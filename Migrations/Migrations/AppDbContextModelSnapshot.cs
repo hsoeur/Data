@@ -226,6 +226,34 @@ namespace Migrations.Migrations
 
                     b.ToTable("ManufacturingOrderNotifications");
                 });
+
+            modelBuilder.Entity("DataLib.User", b =>
+                {
+                    b.Property<string>("UserUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Department")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTimeOffset>("EntryDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTimeOffset>("ExitDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("UserUid");
+
+                    b.ToTable("Users");
+                });
 #pragma warning restore 612, 618
         }
     }

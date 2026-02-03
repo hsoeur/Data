@@ -18,11 +18,14 @@ namespace DataLib
         public DbSet<BillOfMaterial> BillOfMaterials { get; set; }
         public DbSet<ArticleVersion> ArticleVersions { get; set; }
         public DbSet<Firmware> Firmwares { get; set; }
+        public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Let EF Core infer the model from data annotations in ManufacturingOrder
             base.OnModelCreating(modelBuilder);
+
+        
         }
     }
 }
