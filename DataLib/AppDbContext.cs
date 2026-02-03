@@ -19,6 +19,7 @@ namespace DataLib
         public DbSet<ArticleVersion> ArticleVersions { get; set; }
         public DbSet<Firmware> Firmwares { get; set; }
         public DbSet<User> Users { get; set; }
+        public DbSet<Machine> Machines { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

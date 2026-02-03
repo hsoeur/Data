@@ -15,6 +15,7 @@ using Api.Data.Repositories.BillOfMaterialRepo;
 using Api.Data.Repositories.ArticleVersionRepo;
 using Api.Data.Repositories.FirmwareRepo;
 using Api.Data.Repositories.UserRepo;
+using Api.Data.Repositories.MachineRepo;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -66,6 +67,7 @@ builder.Services.AddScoped<IBillOfMaterialRepository, BillOfMaterialRepository>(
 builder.Services.AddScoped<IArticleVersionRepository, ArticleVersionRepository>();
 builder.Services.AddScoped<IFirmwareRepository, FirmwareRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IMachineRepository, MachineRepository>();
 
 var app = builder.Build();
 

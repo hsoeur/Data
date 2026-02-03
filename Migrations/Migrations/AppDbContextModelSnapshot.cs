@@ -152,6 +152,20 @@ namespace Migrations.Migrations
                     b.ToTable("Firmwares");
                 });
 
+            modelBuilder.Entity("DataLib.Machine", b =>
+                {
+                    b.Property<string>("MachineUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("MachineUid");
+
+                    b.ToTable("Machines");
+                });
+
             modelBuilder.Entity("DataLib.ManufacturingOrder", b =>
                 {
                     b.Property<int>("ManufacturingOrderUid")
