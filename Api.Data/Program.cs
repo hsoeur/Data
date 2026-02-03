@@ -16,6 +16,8 @@ using Api.Data.Repositories.ArticleVersionRepo;
 using Api.Data.Repositories.FirmwareRepo;
 using Api.Data.Repositories.UserRepo;
 using Api.Data.Repositories.MachineRepo;
+using Api.Data.Repositories.OperationRepo;
+using Api.Data.Repositories.SequenceRepo;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,6 +70,8 @@ builder.Services.AddScoped<IArticleVersionRepository, ArticleVersionRepository>(
 builder.Services.AddScoped<IFirmwareRepository, FirmwareRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMachineRepository, MachineRepository>();
+builder.Services.AddScoped<IOperationRepository, OperationRepository>();
+builder.Services.AddScoped<ISequenceRepository, SequenceRepository>();
 
 var app = builder.Build();
 

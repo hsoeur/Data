@@ -241,6 +241,69 @@ namespace Migrations.Migrations
                     b.ToTable("ManufacturingOrderNotifications");
                 });
 
+            modelBuilder.Entity("DataLib.Operation", b =>
+                {
+                    b.Property<string>("OperationUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTimeOffset>("CreationDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Machine")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("OperationNumber")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PrepTime")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal>("ProdTime")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("ProductUid")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("OperationUid");
+
+                    b.ToTable("Operations");
+                });
+
+            modelBuilder.Entity("DataLib.Sequence", b =>
+                {
+                    b.Property<string>("SequenceUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTimeOffset>("EndDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("File")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("OperationNumber")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Product")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTimeOffset>("StartDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("SequenceUid");
+
+                    b.ToTable("Sequences");
+                });
+
             modelBuilder.Entity("DataLib.User", b =>
                 {
                     b.Property<string>("UserUid")

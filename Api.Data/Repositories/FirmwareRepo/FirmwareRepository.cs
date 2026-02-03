@@ -214,7 +214,8 @@ namespace Api.Data.Repositories.FirmwareRepo
             try
             {
                 var oldFirm = _context.Firmwares.FirstOrDefault(firm => firm.FirmwareUid == firmware.FirmwareUid);
-                if (oldFirm == null) return null;
+                if (oldFirm == null) return 
+                        null;
 
                 bool hasValue1Changed = oldFirm.File != firmware.File;
                 bool hasValue2Changed = oldFirm.Version != firmware.Version;

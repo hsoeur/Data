@@ -20,6 +20,8 @@ namespace DataLib
         public DbSet<Firmware> Firmwares { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Machine> Machines { get; set; }
+        public DbSet<Operation> Operations { get; set; }
+        public DbSet<Sequence> Sequences { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
