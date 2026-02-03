@@ -22,6 +22,7 @@ namespace DataLib
         public DbSet<Machine> Machines { get; set; }
         public DbSet<Operation> Operations { get; set; }
         public DbSet<Sequence> Sequences { get; set; }
+        public DbSet<MeasurementTraceability> MeasurementTraceabilities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
