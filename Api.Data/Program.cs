@@ -9,6 +9,11 @@ using Microsoft.EntityFrameworkCore;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using Microsoft.OpenApi.Models;
 using Api.Data.Swagger;
+using Api.Data.Repositories.ArticleRepo;
+using Api.Data.Repositories.ManufacturingOrderRepo;
+using Api.Data.Repositories.BillOfMaterialRepo;
+using Api.Data.Repositories.ArticleVersionRepo;
+using Api.Data.Repositories.FirmwareRepo;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,7 +59,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // Repositories
 builder.Services.AddScoped<IManufacturingOrderNotificationRepository, ManufacturingOrderNotificationRepository>();
-builder.Services.AddScoped<Api.Data.Repositories.ManufacturingOrderRepo.IManufacturingOrderRepository, Api.Data.Repositories.ManufacturingOrderRepo.ManufacturingOrderRepository>();
+builder.Services.AddScoped<IManufacturingOrderRepository, ManufacturingOrderRepository>();
+builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
+builder.Services.AddScoped<IBillOfMaterialRepository, BillOfMaterialRepository>();
+builder.Services.AddScoped<IArticleVersionRepository, ArticleVersionRepository>();
+builder.Services.AddScoped<IFirmwareRepository, FirmwareRepository>();
 
 var app = builder.Build();
 

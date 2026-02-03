@@ -22,6 +22,136 @@ namespace Migrations.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
+            modelBuilder.Entity("DataLib.Article", b =>
+                {
+                    b.Property<string>("ArticleUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Designation")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Family")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("GpaoQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ManageStock")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Packaging")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Store")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("SupplierReference")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("ArticleUid");
+
+                    b.ToTable("Articles");
+                });
+
+            modelBuilder.Entity("DataLib.ArticleVersion", b =>
+                {
+                    b.Property<string>("ArticleVersionUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("ArticleUid")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("FirmwareVersion")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("ArticleVersionUid");
+
+                    b.ToTable("ArticleVersions");
+                });
+
+            modelBuilder.Entity("DataLib.BillOfMaterial", b =>
+                {
+                    b.Property<string>("BillOfMaterialsUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Component")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTimeOffset>("CreationDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTimeOffset>("EndDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Operation")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Product")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Quantity")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("QuantityDiv")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("BillOfMaterialsUid");
+
+                    b.ToTable("BillOfMaterials");
+                });
+
+            modelBuilder.Entity("DataLib.Firmware", b =>
+                {
+                    b.Property<string>("FirmwareUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTimeOffset>("EndDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("File")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<bool>("IsSuspended")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Product")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTimeOffset>("StartDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UserUid")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Version")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("FirmwareUid");
+
+                    b.ToTable("Firmwares");
+                });
+
             modelBuilder.Entity("DataLib.ManufacturingOrder", b =>
                 {
                     b.Property<int>("ManufacturingOrderUid")
