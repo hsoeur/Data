@@ -13,18 +13,18 @@ namespace Api.Data.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Produces("application/json")]
-    public class OperatorController : ControllerBase
+    public class UsersController : ControllerBase
     {
         private readonly IUserRepository _userRepository;
 
-        public OperatorController(IUserRepository userRepository)
+        public UsersController(IUserRepository userRepository)
         {
             _userRepository = userRepository;
         }
 
         [SwaggerOperation(
-            Summary = "Récupère tous les opérateurs",
-            Description = "Ce endpoint retourne la liste complète des opérateurs disponibles dans le système.",
+            Summary = "Récupère tous les utilisateurs",
+            Description = "Ce endpoint retourne la liste complète des utilisateurs disponibles dans le système.",
             OperationId = "GetCollectionUsers"
         )]
         [HttpGet("all")]
@@ -36,14 +36,14 @@ namespace Api.Data.Controllers
             try
             {
                 Log.Information("GetCollectionUsers called");
-                var operateurs = await _userRepository.GetCollectionUsers();
-                if (operateurs == null || operateurs.Count == 0)
+                var utilisateurs = await _userRepository.GetCollectionUsers();
+                if (utilisateurs == null || utilisateurs.Count == 0)
                 {
                     Log.Information("GetCollectionUsers returned no content");
                     return NoContent();
                 }
-                Log.Information("GetCollectionUsers successfully returned {Count} operateurs", operateurs.Count);
-                return Ok(operateurs);
+                Log.Information("GetCollectionUsers successfully returned {Count} utilisateurs", utilisateurs.Count);
+                return Ok(utilisateurs);
             }
             catch (System.Exception ex)
             {
@@ -53,71 +53,72 @@ namespace Api.Data.Controllers
         }
 
         [SwaggerOperation(
-            Summary = "Récupère les opérateurs actifs",
-            Description = "Ce endpoint retourne la liste des opérateurs actuellement actifs dans le système.",
-            OperationId = "GetCollectionCurrentOperator"
+            Summary = "Récupère les utilisateurs actifs",
+            Description = "Ce endpoint retourne la liste des utilisateurs actuellement actifs dans le système.",
+            OperationId = "GetCollectionCurrentUsers"
         )]
         [HttpGet("current")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ICollection<User>))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ICollection<User>>> GetCollectionCurrentOperator()
+        public async Task<ActionResult<ICollection<User>>> GetCollectionCurrentUsers()
         {
             try
             {
-                Log.Information("GetCollectionCurrentOperator called");
-                var operateurs = await _userRepository.GetCollectionCurrentUsers();
-                if (operateurs == null || operateurs.Count == 0)
+                Log.Information("GetCollectionCurrentUsers called");
+                var utilisateurs = await _userRepository.GetCollectionCurrentUsers();
+                if (utilisateurs == null || utilisateurs.Count == 0)
                 {
-                    Log.Information("GetCollectionCurrentOperator returned no content");
+                    Log.Information("GetCollectionCurrentUsers returned no content");
                     return NoContent();
                 }
-                Log.Information("GetCollectionCurrentOperator successfully returned {Count} operateurs", operateurs.Count);
-                return Ok(operateurs);
+                Log.Information("GetCollectionCurrentUsers successfully returned {Count} utilisateurs", utilisateurs.Count);
+                return Ok(utilisateurs);
             }
             catch (System.Exception ex)
             {
-                Log.Error(ex, "Exception occurred while processing GetCollectionCurrentOperator");
+                Log.Error(ex, "Exception occurred while processing GetCollectionCurrentUsers");
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
 
         [SwaggerOperation(
-            Summary = "Récupère un opérateur par UID",
-            Description = "Ce endpoint retourne les informations d'un opérateur spécifique basé sur son identifiant unique.",
-            OperationId = "GetOperatorByOperatorUid"
+            Summary = "Récupère un utilisateur par UID",
+            Description = "Ce endpoint retourne les informations d'un utilisateur spécifique basé sur son identifiant unique.",
+            OperationId = "GetUserByUserUid"
         )]
-        [HttpGet("by-operator-uid")]
+        [HttpGet("by-user-uid")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(User))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<User>> GetOperatorByOperatorUid([FromQuery] string operatorUid)
+        public async Task<ActionResult<User>> GetUserByUserUid([FromQuery] string userUid)
         {
-            if (string.IsNullOrWhiteSpace(operatorUid))
+            if (string.IsNullOrWhiteSpace(userUid))
             {
                 return BadRequest(new ProblemDetails
                 {
                     Title = "Paramètre invalide",
-                    Detail = "Le paramètre 'operatorUid' est requis."
+                    Detail = "Le paramètre 'userUid' est requis."
                 });
             }
 
             try
             {
-                Log.Information("GetOperatorByOperatorUid called with operatorUid: {OperatorUid}", operatorUid);
-                var operateur = await _userRepository.GetOperatorByOperatorUid(operatorUid);
-                if (operateur == null)
+                Log.Information("GetUserByUserUid called with userUid: {UserUid}", userUid);
+                // Le dépôt utilise encore le nom 'GetOperatorByOperatorUid' côté interface.
+                var utilisateur = await _userRepository.GetOperatorByOperatorUid(userUid);
+                if (utilisateur == null)
                 {
-                    Log.Information("GetOperatorByOperatorUid did not find an operator for operatorUid: {OperatorUid}", operatorUid);
+                    Log.Information("GetUserByUserUid did not find a user for userUid: {UserUid}", userUid);
                     return NotFound();
                 }
-                Log.Information("GetOperatorByOperatorUid successfully returned an operator with operatorUid: {OperatorUid}", operatorUid);
-                return Ok(operateur);
+                Log.Information("GetUserByUserUid successfully returned a user with userUid: {UserUid}", userUid);
+                return Ok(utilisateur);
             }
             catch (System.Exception ex)
             {
-                Log.Error(ex, "Exception occurred while processing GetOperatorByOperatorUid with operatorUid: {OperatorUid}", operatorUid);
+                Log.Error(ex, "Exception occurred while processing GetUserByUserUid with userUid: {UserUid}", userUid);
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
