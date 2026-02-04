@@ -32,6 +32,7 @@ namespace DataLib
         public DbSet<SimCard> SimCards { get; set; }
         public DbSet<PackagingLocationPhoto> PackagingLocationPhotos { get; set; }
         public DbSet<OrderLine> OrderLines { get; set; }
+        public DbSet<Label> Labels { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

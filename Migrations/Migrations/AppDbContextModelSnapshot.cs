@@ -152,6 +152,49 @@ namespace Migrations.Migrations
                     b.ToTable("Firmwares");
                 });
 
+            modelBuilder.Entity("DataLib.Label", b =>
+                {
+                    b.Property<string>("LabelUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("AuthentiUid")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTimeOffset>("CreationDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("CurrentSerialNumber")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ManufacturingOrderUid")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductUid")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ProductVersion")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Template")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Usage")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserUid")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("LabelUid");
+
+                    b.ToTable("Labels");
+                });
+
             modelBuilder.Entity("DataLib.LabelTemplate", b =>
                 {
                     b.Property<string>("LabelTemplateUid")
