@@ -31,6 +31,7 @@ namespace DataLib
         public DbSet<SolderingProgram> SolderingPrograms { get; set; }
         public DbSet<SimCard> SimCards { get; set; }
         public DbSet<PackagingLocationPhoto> PackagingLocationPhotos { get; set; }
+        public DbSet<OrderLine> OrderLines { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

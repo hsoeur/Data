@@ -370,6 +370,23 @@ namespace Migrations.Migrations
                     b.ToTable("Operations");
                 });
 
+            modelBuilder.Entity("DataLib.OrderLine", b =>
+                {
+                    b.Property<string>("UidOrderLine")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Product")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.HasKey("UidOrderLine");
+
+                    b.ToTable("OrderLines");
+                });
+
             modelBuilder.Entity("DataLib.PackagingLocationPhoto", b =>
                 {
                     b.Property<string>("PackagingLocationPhotoUid")
