@@ -324,6 +324,64 @@ namespace Migrations.Migrations
                     b.ToTable("Operations");
                 });
 
+            modelBuilder.Entity("DataLib.ProductStatus", b =>
+                {
+                    b.Property<string>("ProductStatusUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("ProductStatusUid");
+
+                    b.ToTable("ProductStatuses");
+                });
+
+            modelBuilder.Entity("DataLib.ProductTraceability", b =>
+                {
+                    b.Property<string>("ProductTraceabilityUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTimeOffset>("CreationDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<decimal>("CycleTime")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("MachineUid")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<int>("ManufacturingOrderUid")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OperationNumber")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductSerialNumber")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductStatusUid")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("ProductUid")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserUid")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("ProductTraceabilityUid");
+
+                    b.HasIndex("MachineUid");
+
+                    b.HasIndex("ProductStatusUid");
+
+                    b.HasIndex("UserUid");
+
+                    b.ToTable("ProductTraceabilities");
+                });
+
             modelBuilder.Entity("DataLib.Sequence", b =>
                 {
                     b.Property<string>("SequenceUid")
@@ -377,6 +435,38 @@ namespace Migrations.Migrations
                     b.HasKey("UserUid");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("DataLib.ProductTraceability", b =>
+                {
+                    b.HasOne("DataLib.Machine", "Machine")
+                        .WithMany()
+                        .HasForeignKey("MachineUid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataLib.ProductStatus", "ProductStatus")
+                        .WithMany("ProductTraceabilities")
+                        .HasForeignKey("ProductStatusUid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataLib.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserUid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Machine");
+
+                    b.Navigation("ProductStatus");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DataLib.ProductStatus", b =>
+                {
+                    b.Navigation("ProductTraceabilities");
                 });
 #pragma warning restore 612, 618
         }

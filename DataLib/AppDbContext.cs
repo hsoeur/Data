@@ -23,6 +23,8 @@ namespace DataLib
         public DbSet<Operation> Operations { get; set; }
         public DbSet<Sequence> Sequences { get; set; }
         public DbSet<MeasurementTraceability> MeasurementTraceabilities { get; set; }
+        public DbSet<ProductTraceability> ProductTraceabilities { get; set; }
+        public DbSet<ProductStatus> ProductStatuses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

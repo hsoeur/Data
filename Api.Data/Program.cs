@@ -18,6 +18,7 @@ using Api.Data.Repositories.UserRepo;
 using Api.Data.Repositories.MachineRepo;
 using Api.Data.Repositories.OperationRepo;
 using Api.Data.Repositories.SequenceRepo;
+using Api.Data.Repositories.ProductTraceabilityRepo;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,6 +73,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMachineRepository, MachineRepository>();
 builder.Services.AddScoped<IOperationRepository, OperationRepository>();
 builder.Services.AddScoped<ISequenceRepository, SequenceRepository>();
+builder.Services.AddScoped<IProductTraceabilityRepository, ProductTraceabilityRepository>();
 
 var app = builder.Build();
 
