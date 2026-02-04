@@ -20,6 +20,8 @@ using Api.Data.Repositories.OperationRepo;
 using Api.Data.Repositories.SequenceRepo;
 using Api.Data.Repositories.ProductTraceabilityRepo;
 using Api.Data.Repositories.LabelTypeRepo;
+using Api.Data.Repositories.LabelTemplateRepo;
+using Api.Data.Repositories.SolderingProgramRepo;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -76,6 +78,8 @@ builder.Services.AddScoped<IOperationRepository, OperationRepository>();
 builder.Services.AddScoped<ISequenceRepository, SequenceRepository>();
 builder.Services.AddScoped<IProductTraceabilityRepository, ProductTraceabilityRepository>();
 builder.Services.AddScoped<ILabelTypeRepository, LabelTypeRepository>();
+builder.Services.AddScoped<ILabelTemplateRepository, LabelTemplateRepository>();
+builder.Services.AddScoped<ISolderingProgramRepository, SolderingProgramRepository>();
 
 var app = builder.Build();
 

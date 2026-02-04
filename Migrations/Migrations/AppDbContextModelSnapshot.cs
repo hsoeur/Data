@@ -152,6 +152,42 @@ namespace Migrations.Migrations
                     b.ToTable("Firmwares");
                 });
 
+            modelBuilder.Entity("DataLib.LabelTemplate", b =>
+                {
+                    b.Property<string>("LabelTemplateUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTimeOffset>("EndDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Photo")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Product")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTimeOffset>("StartDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("TemplateFile")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Usage")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserUid")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("LabelTemplateUid");
+
+                    b.ToTable("LabelTemplates");
+                });
+
             modelBuilder.Entity("DataLib.LabelType", b =>
                 {
                     b.Property<string>("LabelTypeUid")
@@ -417,6 +453,38 @@ namespace Migrations.Migrations
                     b.HasKey("SequenceUid");
 
                     b.ToTable("Sequences");
+                });
+
+            modelBuilder.Entity("DataLib.SolderingProgram", b =>
+                {
+                    b.Property<string>("SolderingProgramUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTimeOffset>("EndDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("ProductUid")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Program")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Side")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTimeOffset>("StartDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UserUid")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("SolderingProgramUid");
+
+                    b.ToTable("SolderingPrograms");
                 });
 
             modelBuilder.Entity("DataLib.Tolerance", b =>
