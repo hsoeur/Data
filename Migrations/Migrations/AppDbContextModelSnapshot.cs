@@ -370,6 +370,28 @@ namespace Migrations.Migrations
                     b.ToTable("Operations");
                 });
 
+            modelBuilder.Entity("DataLib.PackagingLocationPhoto", b =>
+                {
+                    b.Property<string>("PackagingLocationPhotoUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("ArticleUid")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Photo")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UseCase")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("PackagingLocationPhotoUid");
+
+                    b.ToTable("PackagingLocationPhotos");
+                });
+
             modelBuilder.Entity("DataLib.ProductStatus", b =>
                 {
                     b.Property<string>("ProductStatusUid")
@@ -453,6 +475,31 @@ namespace Migrations.Migrations
                     b.HasKey("SequenceUid");
 
                     b.ToTable("Sequences");
+                });
+
+            modelBuilder.Entity("DataLib.SimCard", b =>
+                {
+                    b.Property<string>("SimCardUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
+
+                    b.Property<string>("Provider")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar(64)");
+
+                    b.Property<string>("SimCardNumber")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
+
+                    b.HasKey("SimCardUid");
+
+                    b.ToTable("SimCards");
                 });
 
             modelBuilder.Entity("DataLib.SolderingProgram", b =>

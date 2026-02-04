@@ -29,6 +29,8 @@ namespace DataLib
         public DbSet<Tolerance> Tolerances { get; set; }
         public DbSet<LabelTemplate> LabelTemplates { get; set; }
         public DbSet<SolderingProgram> SolderingPrograms { get; set; }
+        public DbSet<SimCard> SimCards { get; set; }
+        public DbSet<PackagingLocationPhoto> PackagingLocationPhotos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

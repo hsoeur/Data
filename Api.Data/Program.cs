@@ -22,6 +22,7 @@ using Api.Data.Repositories.ProductTraceabilityRepo;
 using Api.Data.Repositories.LabelTypeRepo;
 using Api.Data.Repositories.LabelTemplateRepo;
 using Api.Data.Repositories.SolderingProgramRepo;
+using Api.Data.Repositories.SimCardRepo;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -80,6 +81,7 @@ builder.Services.AddScoped<IProductTraceabilityRepository, ProductTraceabilityRe
 builder.Services.AddScoped<ILabelTypeRepository, LabelTypeRepository>();
 builder.Services.AddScoped<ILabelTemplateRepository, LabelTemplateRepository>();
 builder.Services.AddScoped<ISolderingProgramRepository, SolderingProgramRepository>();
+builder.Services.AddScoped<ISimCardRepository, SimCardRepository>();
 
 var app = builder.Build();
 
