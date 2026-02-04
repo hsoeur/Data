@@ -26,6 +26,7 @@ namespace DataLib
         public DbSet<ProductTraceability> ProductTraceabilities { get; set; }
         public DbSet<ProductStatus> ProductStatuses { get; set; }
         public DbSet<LabelType> LabelTypes { get; set; }
+        public DbSet<Tolerance> Tolerances { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

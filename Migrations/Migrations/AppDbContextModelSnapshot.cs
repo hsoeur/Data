@@ -154,10 +154,10 @@ namespace Migrations.Migrations
 
             modelBuilder.Entity("DataLib.LabelType", b =>
                 {
-                    b.Property<string>("UsageUid")
+                    b.Property<string>("LabelTypeUid")
                         .HasColumnType("varchar(255)");
 
-                    b.HasKey("UsageUid");
+                    b.HasKey("LabelTypeUid");
 
                     b.ToTable("LabelTypes");
                 });
@@ -419,6 +419,59 @@ namespace Migrations.Migrations
                     b.ToTable("Sequences");
                 });
 
+            modelBuilder.Entity("DataLib.Tolerance", b =>
+                {
+                    b.Property<string>("ToleranceUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTimeOffset>("EndDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("MachineUid")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<int>("Mode")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OperationNumber")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ProductUid")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTimeOffset>("StartDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("Unit")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserUid")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Val1")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Val2")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("ToleranceUid");
+
+                    b.HasIndex("MachineUid");
+
+                    b.HasIndex("UserUid");
+
+                    b.ToTable("Tolerances");
+                });
+
             modelBuilder.Entity("DataLib.User", b =>
                 {
                     b.Property<string>("UserUid")
@@ -470,6 +523,25 @@ namespace Migrations.Migrations
                     b.Navigation("Machine");
 
                     b.Navigation("ProductStatus");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DataLib.Tolerance", b =>
+                {
+                    b.HasOne("DataLib.Machine", "Machine")
+                        .WithMany()
+                        .HasForeignKey("MachineUid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataLib.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserUid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Machine");
 
                     b.Navigation("User");
                 });
