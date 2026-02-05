@@ -34,6 +34,7 @@ namespace DataLib
         public DbSet<OrderLine> OrderLines { get; set; }
         public DbSet<Label> Labels { get; set; }
         public DbSet<DatabaseNotification> DatabaseNotifications { get; set; }
+        public DbSet<KitTraceability> KitTraceabilities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
