@@ -113,6 +113,58 @@ namespace Migrations.Migrations
                     b.ToTable("BillOfMaterials");
                 });
 
+            modelBuilder.Entity("DataLib.DatabaseNotification", b =>
+                {
+                    b.Property<string>("DatabaseNotificationUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("EntityUId")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTimeOffset>("ModifiedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("ModifiedBy")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("NewValue")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("OldValue")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Processed")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ProcessedBy")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTimeOffset>("ProcessedDate")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("PropertyName")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("DatabaseNotificationUid");
+
+                    b.ToTable("DatabaseNotifications");
+                });
+
             modelBuilder.Entity("DataLib.Firmware", b =>
                 {
                     b.Property<string>("FirmwareUid")
