@@ -16,7 +16,7 @@ namespace DataLib
         public DbSet<ManufacturingOrderNotification> ManufacturingOrderNotifications { get; set; }
         public DbSet<Article> Articles { get; set; }
         public DbSet<BillOfMaterial> BillOfMaterials { get; set; }
-        public DbSet<ArticleVersion> ArticleVersions { get; set; }
+        public DbSet<FirmwareVersion> FirmwareVersions { get; set; }
         public DbSet<Firmware> Firmwares { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Machine> Machines { get; set; }

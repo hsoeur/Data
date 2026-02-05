@@ -12,7 +12,6 @@ using Api.Data.Swagger;
 using Api.Data.Repositories.ArticleRepo;
 using Api.Data.Repositories.ManufacturingOrderRepo;
 using Api.Data.Repositories.BillOfMaterialRepo;
-using Api.Data.Repositories.ArticleVersionRepo;
 using Api.Data.Repositories.FirmwareRepo;
 using Api.Data.Repositories.UserRepo;
 using Api.Data.Repositories.MachineRepo;
@@ -24,6 +23,7 @@ using Api.Data.Repositories.LabelTemplateRepo;
 using Api.Data.Repositories.SolderingProgramRepo;
 using Api.Data.Repositories.SimCardRepo;
 using Api.Data.Repositories.OrderLineRepo;
+using Api.Data.Repositories.ArticleVersionRepo;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -72,7 +72,7 @@ builder.Services.AddScoped<IManufacturingOrderNotificationRepository, Manufactur
 builder.Services.AddScoped<IManufacturingOrderRepository, ManufacturingOrderRepository>();
 builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
 builder.Services.AddScoped<IBillOfMaterialRepository, BillOfMaterialRepository>();
-builder.Services.AddScoped<IArticleVersionRepository, ArticleVersionRepository>();
+builder.Services.AddScoped<IFirmwareVersionRepository, FirmwareVersionRepository>();
 builder.Services.AddScoped<IFirmwareRepository, FirmwareRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IMachineRepository, MachineRepository>();

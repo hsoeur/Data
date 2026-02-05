@@ -1,18 +1,15 @@
 ﻿START TRANSACTION;
-CREATE TABLE `KitAccTraceabilities` (
-    `KitAccTraceabilityUid` varchar(255) CHARACTER SET utf8mb4 NOT NULL,
-    `ClientOrder` longtext CHARACTER SET utf8mb4 NOT NULL,
-    `OrderLineUid` longtext CHARACTER SET utf8mb4 NOT NULL,
-    `Product` longtext CHARACTER SET utf8mb4 NOT NULL,
-    `SerialNumber` int NOT NULL,
-    `ScanFrame` longtext CHARACTER SET utf8mb4 NOT NULL,
-    `Date` datetime(6) NOT NULL,
-    `UserUid` longtext CHARACTER SET utf8mb4 NOT NULL,
-    CONSTRAINT `PK_KitAccTraceabilities` PRIMARY KEY (`KitAccTraceabilityUid`)
+DROP TABLE `ArticleVersions`;
+
+CREATE TABLE `FirmwareVersions` (
+    `FirmwareVersionUid` varchar(255) CHARACTER SET utf8mb4 NOT NULL,
+    `ArticleUid` longtext CHARACTER SET utf8mb4 NOT NULL,
+    `Version` longtext CHARACTER SET utf8mb4 NOT NULL,
+    CONSTRAINT `PK_FirmwareVersions` PRIMARY KEY (`FirmwareVersionUid`)
 ) CHARACTER SET=utf8mb4;
 
 INSERT INTO `__efmigrationshistory` (`MigrationId`, `ProductVersion`)
-VALUES ('20260205083117_KitAccTracea', '9.0.0');
+VALUES ('20260205085636_FirmwareVersion', '9.0.0');
 
 COMMIT;
 

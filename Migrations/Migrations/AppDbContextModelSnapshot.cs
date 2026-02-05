@@ -59,24 +59,6 @@ namespace Migrations.Migrations
                     b.ToTable("Articles");
                 });
 
-            modelBuilder.Entity("DataLib.ArticleVersion", b =>
-                {
-                    b.Property<string>("ArticleVersionUid")
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("ArticleUid")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("FirmwareVersion")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("ArticleVersionUid");
-
-                    b.ToTable("ArticleVersions");
-                });
-
             modelBuilder.Entity("DataLib.BillOfMaterial", b =>
                 {
                     b.Property<string>("BillOfMaterialsUid")
@@ -202,6 +184,24 @@ namespace Migrations.Migrations
                     b.HasKey("FirmwareUid");
 
                     b.ToTable("Firmwares");
+                });
+
+            modelBuilder.Entity("DataLib.FirmwareVersion", b =>
+                {
+                    b.Property<string>("FirmwareVersionUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("ArticleUid")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Version")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("FirmwareVersionUid");
+
+                    b.ToTable("FirmwareVersions");
                 });
 
             modelBuilder.Entity("DataLib.KitAccTraceability", b =>
