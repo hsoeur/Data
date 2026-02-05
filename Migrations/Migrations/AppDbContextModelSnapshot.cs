@@ -168,20 +168,24 @@ namespace Migrations.Migrations
 
                     b.Property<string>("Product")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<DateTimeOffset>("StartDate")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("UserUid")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Version")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.HasKey("FirmwareUid");
+
+                    b.HasIndex("Product");
+
+                    b.HasIndex("UserUid");
 
                     b.ToTable("Firmwares");
                 });
@@ -797,6 +801,25 @@ namespace Migrations.Migrations
                     b.HasKey("UserUid");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("DataLib.Firmware", b =>
+                {
+                    b.HasOne("DataLib.Article", "Article")
+                        .WithMany()
+                        .HasForeignKey("Product")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataLib.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserUid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DataLib.ProductTraceability", b =>
