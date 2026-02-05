@@ -204,6 +204,42 @@ namespace Migrations.Migrations
                     b.ToTable("Firmwares");
                 });
 
+            modelBuilder.Entity("DataLib.KitAccTraceability", b =>
+                {
+                    b.Property<string>("KitAccTraceabilityUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("ClientOrder")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTimeOffset>("Date")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("OrderLineUid")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Product")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ScanFrame")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("SerialNumber")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserUid")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("KitAccTraceabilityUid");
+
+                    b.ToTable("KitAccTraceabilities");
+                });
+
             modelBuilder.Entity("DataLib.KitTraceability", b =>
                 {
                     b.Property<string>("KitTraceabilityUid")
