@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace DataLib
@@ -19,13 +20,25 @@ namespace DataLib
         public required string AuthentiUid { get; set; }
 
         [SwaggerSchema(Description = "Identifiant de l'utilisateur ayant généré l'étiquette.")]
+        [ForeignKey(nameof(User))]
         public required string UserUid { get; set; }
 
+        [SwaggerSchema(Description = "Utilisateur référencé par l'identifiant.")]
+        public User? User { get; set; }
+
         [SwaggerSchema(Description = "Identifiant du produit concerné par l'étiquette.")]
+        [ForeignKey(nameof(Article))]
         public required string ProductUid { get; set; }
 
+        [SwaggerSchema(Description = "Article référencé par le code produit de l'étiquette.")]
+        public Article? Article { get; set; }
+
         [SwaggerSchema(Description = "Identifiant de l'ordre de fabrication lié à l'étiquette.")]
+        [ForeignKey(nameof(ManufacturingOrder))]
         public required int ManufacturingOrderUid { get; set; }
+
+        [SwaggerSchema(Description = "Ordre de fabrication référencé par l'identifiant.")]
+        public ManufacturingOrder? ManufacturingOrder { get; set; }
 
         [SwaggerSchema(Description = "Date de création de l'étiquette.")]
         public required DateTimeOffset CreationDate { get; set; }
@@ -37,7 +50,11 @@ namespace DataLib
         public required string ProductVersion { get; set; }
 
         [SwaggerSchema(Description = "Usage associé à l’étiquette (ex : Test, Production, SAV...).")]
-        public required string Usage { get; set; }
+        [ForeignKey(nameof(LabelType))]
+        public required string LabelTypeUid { get; set; }
+
+        [SwaggerSchema(Description = "Type d'étiquette référencé par l'identifiant de type.")]
+        public LabelType? LabelType { get; set; }
 
         [SwaggerSchema(Description = "Nom du template utilisé pour générer l’étiquette.")]
         public required string Template { get; set; }
@@ -47,7 +64,7 @@ namespace DataLib
             return $"Label [LabelUid={LabelUid}, AuthentiUid={AuthentiUid}, UserUid={UserUid}, ProductUid={ProductUid}, " +
             $"ManufacturingOrderUid={ManufacturingOrderUid}, CreationDate={CreationDate}, " +
             $"CurrentSerialNumber={CurrentSerialNumber}, ProductVersion={ProductVersion}, " +
-            $"Usage={Usage}, Template={Template}]";
+            $"LabelTypeUid={LabelTypeUid}, Template={Template}]";
         }
     }
 }

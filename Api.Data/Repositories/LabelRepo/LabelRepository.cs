@@ -146,7 +146,7 @@ namespace Api.Data.Repositories.LabelRepo
             try
             {
                 var labels = await _context.Labels
-                    .Where(e => e.ManufacturingOrderUid == manufacturingOrderUid && e.Usage == usageUid)
+                    .Where(e => e.ManufacturingOrderUid == manufacturingOrderUid && e.LabelTypeUid == usageUid)
                     .ToListAsync();
 
                 var of = await _context.ManufacturingOrders
@@ -178,7 +178,7 @@ namespace Api.Data.Repositories.LabelRepo
             {
                 var etiquettes = await _context.Labels
                     .Where(eti => eti.ManufacturingOrderUid == manufacturingOrderUid && (eti.CurrentSerialNumber.ToString().Contains(keyword) || eti.AuthentiUid.Contains(keyword)))
-                    .Where(eti => eti.Usage == usageUid)
+                    .Where(eti => eti.LabelTypeUid == usageUid)
                     .OrderBy(eti => eti.CurrentSerialNumber)
                     .ToListAsync();
 
@@ -199,7 +199,7 @@ namespace Api.Data.Repositories.LabelRepo
             try
             {
                 var etiquettes = await _context.Labels
-                    .Where(eti => eti.Usage == usageUid)
+                    .Where(eti => eti.LabelTypeUid == usageUid)
                     .Where(eti => eti.ManufacturingOrderUid == manufacturingOrderUid)
                     .OrderBy(eti => eti.CurrentSerialNumber)
                     .ToListAsync();

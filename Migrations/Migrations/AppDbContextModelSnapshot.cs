@@ -295,12 +295,16 @@ namespace Migrations.Migrations
                     b.Property<int>("CurrentSerialNumber")
                         .HasColumnType("int");
 
+                    b.Property<string>("LabelTypeUid")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
                     b.Property<int>("ManufacturingOrderUid")
                         .HasColumnType("int");
 
                     b.Property<string>("ProductUid")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("ProductVersion")
                         .IsRequired()
@@ -310,15 +314,19 @@ namespace Migrations.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Usage")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<string>("UserUid")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("LabelUid");
+
+                    b.HasIndex("LabelTypeUid");
+
+                    b.HasIndex("ManufacturingOrderUid");
+
+                    b.HasIndex("ProductUid");
+
+                    b.HasIndex("UserUid");
 
                     b.ToTable("Labels");
                 });
@@ -818,6 +826,41 @@ namespace Migrations.Migrations
                         .IsRequired();
 
                     b.Navigation("Article");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DataLib.Label", b =>
+                {
+                    b.HasOne("DataLib.LabelType", "LabelType")
+                        .WithMany()
+                        .HasForeignKey("LabelTypeUid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataLib.ManufacturingOrder", "ManufacturingOrder")
+                        .WithMany()
+                        .HasForeignKey("ManufacturingOrderUid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataLib.Article", "Article")
+                        .WithMany()
+                        .HasForeignKey("ProductUid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataLib.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserUid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
+
+                    b.Navigation("LabelType");
+
+                    b.Navigation("ManufacturingOrder");
 
                     b.Navigation("User");
                 });

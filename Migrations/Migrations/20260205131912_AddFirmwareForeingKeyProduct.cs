@@ -23,7 +23,7 @@ namespace Migrations.Migrations
             // Supprime l'index existant si présent pour éviter l'erreur "Duplicate key name"
             migrationBuilder.Sql(@"
                 SET @exists := (SELECT COUNT(1) FROM INFORMATION_SCHEMA.STATISTICS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Firmwares' AND INDEX_NAME = 'IX_Firmwares_Product');
-                SET @stmt := IF(@exists >0, 'DROP INDEX `IX_Firmwares_Product` ON `Firmwares`', 'SELECT1');
+                SET @stmt := IF(@exists >0, 'DROP INDEX `IX_Firmwares_Product` ON `Firmwares`', 'SELECT 1');
                 PREPARE s FROM @stmt; EXECUTE s; DEALLOCATE PREPARE s;
             ");
 
