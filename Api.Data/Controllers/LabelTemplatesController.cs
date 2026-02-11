@@ -239,9 +239,9 @@ namespace Api.Data.Controllers
             {
                 return BadRequest(new ProblemDetails { Title = "Paramètre invalide", Detail = "Le paramètre 'Product' est requis." });
             }
-            if (string.IsNullOrWhiteSpace(request.Usage))
+            if (string.IsNullOrWhiteSpace(request.LabelTypeUid))
             {
-                return BadRequest(new ProblemDetails { Title = "Paramètre invalide", Detail = "Le paramètre 'Usage' est requis." });
+                return BadRequest(new ProblemDetails { Title = "Paramètre invalide", Detail = "Le paramètre 'LabelTypeUid' est requis." });
             }
 
             Log.Information("CreateLabelTemplate called with request: {@Request}", request);
@@ -253,7 +253,7 @@ namespace Api.Data.Controllers
                 {
                     LabelTemplateUid = Guid.NewGuid().ToString(),
                     Product = request.Product,
-                    Usage = request.Usage,
+                    LabelTypeUid = request.LabelTypeUid,
                     Photo = request.Photo,
                     TemplateFile = request.TemplateFile,
                     StartDate = now,

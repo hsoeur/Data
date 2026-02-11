@@ -22,9 +22,9 @@ namespace Api.Data.Repositories.LabelTemplateRepo
             {
                 var templates = _context.LabelTemplates
                     .AsEnumerable()
-                    .Where(ucp => ucp.Product.Contains(keyword) || ucp.Usage.Contains(keyword) || ucp.TemplateFile.Contains(keyword))
+                    .Where(ucp => ucp.Product.Contains(keyword) || ucp.LabelTypeUid.Contains(keyword) || ucp.TemplateFile.Contains(keyword))
                     .OrderBy(u => u.Product)
-                    .ThenBy(u => u.Usage)
+                    .ThenBy(u => u.LabelTypeUid)
                     .ThenByDescending(tol => tol.EndDate)
                     .ToList();
 
@@ -51,11 +51,11 @@ namespace Api.Data.Repositories.LabelTemplateRepo
                     throw new InvalidOperationException($"Produit avec UidArticle {usageCorrespondanceProduit.Product} n'existe pas.");
                 }
 
-                var ucpExists = await _context.LabelTemplates.AnyAsync(ucp => ucp.Product == usageCorrespondanceProduit.Product && ucp.Usage == usageCorrespondanceProduit.Usage);
+                var ucpExists = await _context.LabelTemplates.AnyAsync(ucp => ucp.Product == usageCorrespondanceProduit.Product && ucp.LabelTypeUid == usageCorrespondanceProduit.LabelTypeUid);
                 if (ucpExists)
                 {
-                    Log.Warning("Template existe déjà pour produit {UidArticle} et usage {Usage}.", usageCorrespondanceProduit.Product, usageCorrespondanceProduit.Usage);
-                    throw new InvalidOperationException($"Template avec UidArticle {usageCorrespondanceProduit.Product} et {usageCorrespondanceProduit.Usage} existe déjà dans la base, modifier le template existant si vous voulez changer le fichier template associé.");
+                    Log.Warning("Template existe déjà pour produit {UidArticle} et usage {Usage}.", usageCorrespondanceProduit.Product, usageCorrespondanceProduit.LabelTypeUid);
+                    throw new InvalidOperationException($"Template avec UidArticle {usageCorrespondanceProduit.Product} et {usageCorrespondanceProduit.LabelTypeUid} existe déjà dans la base, modifier le template existant si vous voulez changer le fichier template associé.");
                 }
 
                 _context.LabelTemplates.Add(usageCorrespondanceProduit);
@@ -76,7 +76,7 @@ namespace Api.Data.Repositories.LabelTemplateRepo
             try
             {
                 var usageCorrespondanceProduit = await _context.LabelTemplates
-                    .FirstOrDefaultAsync(ucp => ucp.Product == uidProduit && ucp.Usage == usage);
+                    .FirstOrDefaultAsync(ucp => ucp.Product == uidProduit && ucp.LabelTypeUid == usage);
 
                 if (usageCorrespondanceProduit == null)
                 {
@@ -133,7 +133,7 @@ namespace Api.Data.Repositories.LabelTemplateRepo
                 var templates = _context.LabelTemplates
                     .AsEnumerable()
                     .OrderBy(u => u.Product)
-                    .ThenBy(u => u.Usage)
+                    .ThenBy(u => u.LabelTypeUid)
                     .ThenByDescending(tol => tol.EndDate)
                     .ToList();
 
@@ -160,7 +160,7 @@ namespace Api.Data.Repositories.LabelTemplateRepo
                 var usageCorrespondanceProduits = allUsageCorrespondanceProduits
                     .Where(u => u.EndDate > today)
                     .OrderBy(u => u.Product)
-                    .ThenBy(u => u.Usage)
+                    .ThenBy(u => u.LabelTypeUid)
                     .ThenBy(u => u.TemplateFile)
                     .ToList();
 
@@ -198,7 +198,7 @@ namespace Api.Data.Repositories.LabelTemplateRepo
                     {
                         LabelTemplateUid = Guid.NewGuid().ToString(),
                         Product = usageCorrespondanceProduit.Product,
-                        Usage = usageCorrespondanceProduit.Usage,
+                        LabelTypeUid = usageCorrespondanceProduit.LabelTypeUid,
                         Photo = usageCorrespondanceProduit.Photo,
                         TemplateFile = usageCorrespondanceProduit.TemplateFile,
                         StartDate = nowPlusOneSecond,
@@ -249,9 +249,9 @@ namespace Api.Data.Repositories.LabelTemplateRepo
             {
                 var today = DateTimeOffset.Now;
                 var etiquettes = await _context.LabelTemplates
-                    .Where(ucp => ucp.Product.Contains(keyword) || ucp.Usage.Contains(keyword) || ucp.TemplateFile.Contains(keyword))
+                    .Where(ucp => ucp.Product.Contains(keyword) || ucp.LabelTypeUid.Contains(keyword) || ucp.TemplateFile.Contains(keyword))
                     .OrderBy(u => u.Product)
-                    .ThenBy(u => u.Usage)
+                    .ThenBy(u => u.LabelTypeUid)
                     .ToListAsync();
 
                 var activesTolerancesKeyword = etiquettes

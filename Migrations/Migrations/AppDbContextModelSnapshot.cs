@@ -339,13 +339,17 @@ namespace Migrations.Migrations
                     b.Property<DateTimeOffset>("EndDate")
                         .HasColumnType("datetime(6)");
 
+                    b.Property<string>("LabelTypeUid")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
                     b.Property<string>("Photo")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Product")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<DateTimeOffset>("StartDate")
                         .HasColumnType("datetime(6)");
@@ -354,15 +358,15 @@ namespace Migrations.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Usage")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<string>("UserUid")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.HasKey("LabelTemplateUid");
+
+                    b.HasIndex("LabelTypeUid");
+
+                    b.HasIndex("Product");
 
                     b.ToTable("LabelTemplates");
                 });
@@ -863,6 +867,25 @@ namespace Migrations.Migrations
                     b.Navigation("ManufacturingOrder");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DataLib.LabelTemplate", b =>
+                {
+                    b.HasOne("DataLib.LabelType", "LabelType")
+                        .WithMany()
+                        .HasForeignKey("LabelTypeUid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataLib.Article", "Article")
+                        .WithMany()
+                        .HasForeignKey("Product")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
+
+                    b.Navigation("LabelType");
                 });
 
             modelBuilder.Entity("DataLib.ProductTraceability", b =>

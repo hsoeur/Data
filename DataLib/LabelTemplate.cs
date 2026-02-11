@@ -1,5 +1,6 @@
 using Swashbuckle.AspNetCore.Annotations;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace DataLib
 {
@@ -16,10 +17,18 @@ namespace DataLib
         public required string LabelTemplateUid { get; set; }
 
         [SwaggerSchema(Description = "Code produit auquel est associé le template.")]
+        [ForeignKey(nameof(Article))]
         public required string Product { get; set; }
 
+        [SwaggerSchema(Description = "Article référencé par le code produit du template.")]
+        public Article? Article { get; set; }
+
         [SwaggerSchema(Description = "Usage de l’étiquette (ex : Production, SAV, Test...).")]
-        public required string Usage { get; set; }
+        [ForeignKey(nameof(LabelType))]
+        public required string LabelTypeUid { get; set; }
+
+        [SwaggerSchema(Description = "Type d'étiquette référencé par l'identifiant de type.")]
+        public LabelType? LabelType { get; set; }
 
         [SwaggerSchema(Description = "Nom ou chemin du fichier de template utilisé pour l’impression.")]
         public required string TemplateFile { get; set; }

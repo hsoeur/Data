@@ -1,10 +1,12 @@
 ﻿START TRANSACTION;
-CREATE INDEX `IX_Labels_ManufacturingOrderUid` ON `Labels` (`ManufacturingOrderUid`);
+ALTER TABLE `LabelTemplates` MODIFY COLUMN `LabelTypeUid` varchar(255) CHARACTER SET utf8mb4 NOT NULL;
 
-ALTER TABLE `Labels` ADD CONSTRAINT `FK_Labels_ManufacturingOrders_ManufacturingOrderUid` FOREIGN KEY (`ManufacturingOrderUid`) REFERENCES `ManufacturingOrders` (`ManufacturingOrderUid`) ON DELETE CASCADE;
+CREATE INDEX `IX_LabelTemplates_LabelTypeUid` ON `LabelTemplates` (`LabelTypeUid`);
+
+ALTER TABLE `LabelTemplates` ADD CONSTRAINT `FK_LabelTemplates_LabelTypes_LabelTypeUid` FOREIGN KEY (`LabelTypeUid`) REFERENCES `LabelTypes` (`LabelTypeUid`) ON DELETE CASCADE;
 
 INSERT INTO `__efmigrationshistory` (`MigrationId`, `ProductVersion`)
-VALUES ('20260206085600_FKOfLabel', '9.0.0');
+VALUES ('20260206095428_FKLabelTemplate2', '9.0.0');
 
 COMMIT;
 
