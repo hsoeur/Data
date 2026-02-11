@@ -1,12 +1,12 @@
 ﻿START TRANSACTION;
-ALTER TABLE `Sequences` MODIFY COLUMN `Product` varchar(255) CHARACTER SET utf8mb4 NOT NULL;
+ALTER TABLE `Tolerances` MODIFY COLUMN `ProductUid` varchar(255) CHARACTER SET utf8mb4 NOT NULL;
 
-CREATE INDEX `IX_Sequences_Product` ON `Sequences` (`Product`);
+CREATE INDEX `IX_Tolerances_ProductUid` ON `Tolerances` (`ProductUid`);
 
-ALTER TABLE `Sequences` ADD CONSTRAINT `FK_Sequences_Articles_Product` FOREIGN KEY (`Product`) REFERENCES `Articles` (`ArticleUid`) ON DELETE CASCADE;
+ALTER TABLE `Tolerances` ADD CONSTRAINT `FK_Tolerances_Articles_ProductUid` FOREIGN KEY (`ProductUid`) REFERENCES `Articles` (`ArticleUid`) ON DELETE CASCADE;
 
 INSERT INTO `__efmigrationshistory` (`MigrationId`, `ProductVersion`)
-VALUES ('20260211090049_FKSequence', '9.0.0');
+VALUES ('20260211092642_FKTolerance', '9.0.0');
 
 COMMIT;
 

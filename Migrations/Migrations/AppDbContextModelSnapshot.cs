@@ -719,7 +719,7 @@ namespace Migrations.Migrations
 
                     b.Property<string>("ProductUid")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Program")
                         .IsRequired()
@@ -734,9 +734,13 @@ namespace Migrations.Migrations
 
                     b.Property<string>("UserUid")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.HasKey("SolderingProgramUid");
+
+                    b.HasIndex("ProductUid");
+
+                    b.HasIndex("UserUid");
 
                     b.ToTable("SolderingPrograms");
                 });
@@ -765,7 +769,7 @@ namespace Migrations.Migrations
 
                     b.Property<string>("ProductUid")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<DateTimeOffset>("StartDate")
                         .HasColumnType("datetime(6)");
@@ -788,6 +792,8 @@ namespace Migrations.Migrations
                     b.HasKey("ToleranceUid");
 
                     b.HasIndex("MachineUid");
+
+                    b.HasIndex("ProductUid");
 
                     b.HasIndex("UserUid");
 
@@ -960,11 +966,11 @@ namespace Migrations.Migrations
                     b.Navigation("Article");
                 });
 
-            modelBuilder.Entity("DataLib.Tolerance", b =>
+            modelBuilder.Entity("DataLib.SolderingProgram", b =>
                 {
-                    b.HasOne("DataLib.Machine", "Machine")
+                    b.HasOne("DataLib.Article", "Article")
                         .WithMany()
-                        .HasForeignKey("MachineUid")
+                        .HasForeignKey("ProductUid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -973,6 +979,33 @@ namespace Migrations.Migrations
                         .HasForeignKey("UserUid")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Article");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DataLib.Tolerance", b =>
+                {
+                    b.HasOne("DataLib.Machine", "Machine")
+                        .WithMany()
+                        .HasForeignKey("MachineUid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataLib.Article", "Article")
+                        .WithMany()
+                        .HasForeignKey("ProductUid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataLib.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserUid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
 
                     b.Navigation("Machine");
 

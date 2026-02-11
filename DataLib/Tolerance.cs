@@ -17,7 +17,9 @@ namespace DataLib
         public required string ToleranceUid { get; set; }
 
         [SwaggerSchema(Description = "Identifiant du produit concerné par la tolérance.")]
+        [ForeignKey(nameof(Article))]
         public required string ProductUid { get; set; }
+        public Article? Article { get; set; }
 
         [SwaggerSchema(Description = "Nom ou libellé de la caractéristique mesurée (ex : Tension, Température, etc.).")]
         public required string Label { get; set; }
