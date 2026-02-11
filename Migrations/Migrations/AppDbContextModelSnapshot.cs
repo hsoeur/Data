@@ -672,12 +672,14 @@ namespace Migrations.Migrations
 
                     b.Property<string>("Product")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<DateTimeOffset>("StartDate")
                         .HasColumnType("datetime(6)");
 
                     b.HasKey("SequenceUid");
+
+                    b.HasIndex("Product");
 
                     b.ToTable("Sequences");
                 });
@@ -945,6 +947,17 @@ namespace Migrations.Migrations
                     b.Navigation("ProductStatus");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("DataLib.Sequence", b =>
+                {
+                    b.HasOne("DataLib.Article", "Article")
+                        .WithMany()
+                        .HasForeignKey("Product")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
                 });
 
             modelBuilder.Entity("DataLib.Tolerance", b =>
