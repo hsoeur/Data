@@ -488,31 +488,36 @@ namespace Migrations.Migrations
 
                     b.Property<string>("MachineUid")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<int>("OperationNumber")
                         .HasColumnType("int");
 
                     b.Property<string>("ProductUid")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<int>("SerialNumber")
                         .HasColumnType("int");
 
-                    b.Property<string>("UnitUid")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int>("Unit")
+                        .HasColumnType("int");
 
                     b.Property<string>("UserUid")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("Value")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.HasKey("MeasurementTraceabilityUid");
+
+                    b.HasIndex("MachineUid");
+
+                    b.HasIndex("ProductUid");
+
+                    b.HasIndex("UserUid");
 
                     b.ToTable("MeasurementTraceabilities");
                 });
@@ -886,6 +891,33 @@ namespace Migrations.Migrations
                     b.Navigation("Article");
 
                     b.Navigation("LabelType");
+                });
+
+            modelBuilder.Entity("DataLib.MeasurementTraceability", b =>
+                {
+                    b.HasOne("DataLib.Machine", "Machine")
+                        .WithMany()
+                        .HasForeignKey("MachineUid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataLib.Article", "Article")
+                        .WithMany()
+                        .HasForeignKey("ProductUid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataLib.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserUid")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Article");
+
+                    b.Navigation("Machine");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DataLib.ProductTraceability", b =>
