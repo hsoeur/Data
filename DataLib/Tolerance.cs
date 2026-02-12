@@ -54,9 +54,9 @@ namespace DataLib
         public Machine? Machine { get; set; }
 
         [SwaggerSchema(Description = "Mode de mesure concerné.")]
-        public required Mode Mode { get; set; }
+        public required string Mode { get; set; }
 
         [SwaggerSchema(Description = "Unité utilisée pour la mesure.")]
-        public required Unit Unit { get; set; }
+        public required string Unit { get; set; }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using DataLib;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Api.Data.Dtos
 {
@@ -8,10 +9,11 @@ namespace Api.Data.Dtos
         public required int OperationNumber { get; set; }
         public required string MachineUid { get; set; }
         public required string Label { get; set; }
-        public required Mode Mode { get; set; }
+        public required string Mode { get; set; }
         public required string Val1 { get; set; }
         public required string Val2 { get; set; }
-        public required Unit Unit { get; set; }
+        [SwaggerSchema(Description = "Unité utilisée pour la mesure.")]
+        public required string Unit { get; set; }
         public required string UserUid { get; set; }
         public required DateTimeOffset StartDate { get; set; }
         public required DateTimeOffset EndDate { get; set; }

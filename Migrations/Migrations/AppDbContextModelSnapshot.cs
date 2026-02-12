@@ -500,8 +500,9 @@ namespace Migrations.Migrations
                     b.Property<int>("SerialNumber")
                         .HasColumnType("int");
 
-                    b.Property<int>("Unit")
-                        .HasColumnType("int");
+                    b.Property<string>("UnitUid")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<string>("UserUid")
                         .IsRequired()
@@ -721,9 +722,8 @@ namespace Migrations.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(255)");
 
-                    b.Property<string>("Program")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int>("Program")
+                        .HasColumnType("int");
 
                     b.Property<string>("Side")
                         .IsRequired()
@@ -761,8 +761,9 @@ namespace Migrations.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(255)");
 
-                    b.Property<int>("Mode")
-                        .HasColumnType("int");
+                    b.Property<string>("Mode")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<int>("OperationNumber")
                         .HasColumnType("int");
@@ -774,8 +775,9 @@ namespace Migrations.Migrations
                     b.Property<DateTimeOffset>("StartDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<int>("Unit")
-                        .HasColumnType("int");
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<string>("UserUid")
                         .IsRequired()

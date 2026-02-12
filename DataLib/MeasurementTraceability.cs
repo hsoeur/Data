@@ -34,7 +34,7 @@ namespace DataLib
         public int OperationNumber { get; set; }
 
         [SwaggerSchema(Description = "Identifiant de l’unité de mesure (ex: V, °C, Ohm).")]
-        public Unit Unit { get; set; } = new Unit();
+        public string UnitUid { get; set; } = DataLib.Unit.Unknown;
 
         [SwaggerSchema(Description = "Identifiant de l’utilisateur ayant effectué la mesure.")]
         [ForeignKey(nameof(User))]

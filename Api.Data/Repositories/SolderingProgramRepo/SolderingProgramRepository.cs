@@ -52,13 +52,21 @@ namespace Api.Data.Repositories.SolderingProgramRepo
             {
                 Log.Information("Searching for soldering programs with keyword: {Keyword}", keyword);
 
-                var programs = await _context.SolderingPrograms
+                // Prepare numeric filter for Program if keyword is an int
+                bool hasNumericProgram = int.TryParse(keyword, out var programValue);
+
+                var query = _context.SolderingPrograms
                     .AsNoTracking()
-                    .Where(ucp => ucp.ProductUid.Contains(keyword) || ucp.Program.Contains(keyword) || ucp.Side.Contains(keyword))
+                    .Where(ucp =>
+                        ucp.ProductUid.Contains(keyword) ||
+                        ucp.Side.Contains(keyword) ||
+                        (hasNumericProgram && ucp.Program == programValue)
+                    )
                     .OrderBy(u => u.ProductUid)
                     .ThenBy(u => u.Side)
-                    .ThenByDescending(u => u.EndDate)
-                    .ToListAsync();
+                    .ThenByDescending(u => u.EndDate);
+
+                var programs = await query.ToListAsync();
 
                 if (!programs.Any())
                 {
@@ -111,10 +119,18 @@ namespace Api.Data.Repositories.SolderingProgramRepo
             try
             {
                 var now = DateTimeOffset.Now;
+                bool hasNumericProgram = int.TryParse(keyword, out var programValue);
 
                 var activePrograms = await _context.SolderingPrograms
                     .AsNoTracking()
-                    .Where(ucp => (ucp.ProductUid.Contains(keyword) || ucp.Program.Contains(keyword) || ucp.Side.Contains(keyword)) && ucp.EndDate > now)
+                    .Where(ucp =>
+                        ucp.EndDate > now &&
+                        (
+                            ucp.ProductUid.Contains(keyword) ||
+                            ucp.Side.Contains(keyword) ||
+                            (hasNumericProgram && ucp.Program == programValue)
+                        )
+                    )
                     .OrderBy(u => u.ProductUid)
                     .ThenBy(u => u.Side)
                     .ToListAsync();

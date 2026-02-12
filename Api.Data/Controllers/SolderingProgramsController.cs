@@ -215,6 +215,10 @@ namespace Api.Data.Controllers
             {
                 return BadRequest(new ProblemDetails { Title = "Paramètre invalide", Detail = "Le paramètre 'Program' est requis." });
             }
+            if (!int.TryParse(request.Program, out var programValue))
+            {
+                return BadRequest(new ProblemDetails { Title = "Paramètre invalide", Detail = "Le paramètre 'Program' doit être un entier." });
+            }
 
             try
             {
@@ -223,7 +227,7 @@ namespace Api.Data.Controllers
                 var solderingProgram = new SolderingProgram
                 {
                     SolderingProgramUid = Guid.NewGuid().ToString(),
-                    Program = request.Program,
+                    Program = programValue,
                     StartDate = now,
                     EndDate = DateTimeOffset.Parse("9999-12-31T23:59:59Z"),
                     UserUid = request.UserUid,

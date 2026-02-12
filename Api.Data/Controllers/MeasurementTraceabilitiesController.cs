@@ -47,11 +47,10 @@ namespace Api.Data.Controllers
                 });
             }
 
-            // Convertir l'unité reçue (string) en énumération Unit
-            var unit = Unit.Unknown;
+            var unitUid = DataLib.Unit.Unknown;
             if (!string.IsNullOrWhiteSpace(traceabilityDto.UnitUid))
             {
-                Enum.TryParse<Unit>(traceabilityDto.UnitUid, ignoreCase: true, out unit);
+                unitUid = traceabilityDto.UnitUid;
             }
 
             var traceability = new MeasurementTraceability
@@ -65,7 +64,7 @@ namespace Api.Data.Controllers
                 Classification = traceabilityDto.Classification,
                 CreationDate = traceabilityDto.CreationDate,
                 UserUid = traceabilityDto.UserUid,
-                Unit = unit,
+                UnitUid = unitUid,
                 OperationNumber = traceabilityDto.OperationNumber,
             };
 

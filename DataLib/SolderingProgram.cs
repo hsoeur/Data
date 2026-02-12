@@ -22,7 +22,7 @@ namespace DataLib
         public Article? Article { get; set; }
 
         [SwaggerSchema(Description = "Nom ou référence du programme de soudure.")]
-        public required string Program { get; set; }
+        public required int Program { get; set; }
 
         [SwaggerSchema(Description = "Date de début de validité du programme.")]
         public required DateTimeOffset StartDate { get; set; }
