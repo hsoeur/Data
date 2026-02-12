@@ -835,13 +835,13 @@ namespace Migrations.Migrations
                     b.HasOne("DataLib.Article", "Article")
                         .WithMany()
                         .HasForeignKey("Product")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("DataLib.User", "User")
                         .WithMany()
                         .HasForeignKey("UserUid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Article");
@@ -854,25 +854,25 @@ namespace Migrations.Migrations
                     b.HasOne("DataLib.LabelType", "LabelType")
                         .WithMany()
                         .HasForeignKey("LabelTypeUid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("DataLib.ManufacturingOrder", "ManufacturingOrder")
                         .WithMany()
                         .HasForeignKey("ManufacturingOrderUid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("DataLib.Article", "Article")
                         .WithMany()
                         .HasForeignKey("ProductUid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("DataLib.User", "User")
                         .WithMany()
                         .HasForeignKey("UserUid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Article");
@@ -889,13 +889,13 @@ namespace Migrations.Migrations
                     b.HasOne("DataLib.LabelType", "LabelType")
                         .WithMany()
                         .HasForeignKey("LabelTypeUid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("DataLib.Article", "Article")
                         .WithMany()
                         .HasForeignKey("Product")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Article");
@@ -908,19 +908,19 @@ namespace Migrations.Migrations
                     b.HasOne("DataLib.Machine", "Machine")
                         .WithMany()
                         .HasForeignKey("MachineUid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("DataLib.Article", "Article")
                         .WithMany()
                         .HasForeignKey("ProductUid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("DataLib.User", "User")
                         .WithMany()
                         .HasForeignKey("UserUid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Article");
@@ -935,19 +935,19 @@ namespace Migrations.Migrations
                     b.HasOne("DataLib.Machine", "Machine")
                         .WithMany()
                         .HasForeignKey("MachineUid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("DataLib.ProductStatus", "ProductStatus")
                         .WithMany("ProductTraceabilities")
                         .HasForeignKey("ProductStatusUid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("DataLib.User", "User")
                         .WithMany()
                         .HasForeignKey("UserUid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Machine");
@@ -962,7 +962,7 @@ namespace Migrations.Migrations
                     b.HasOne("DataLib.Article", "Article")
                         .WithMany()
                         .HasForeignKey("Product")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Article");
@@ -973,13 +973,13 @@ namespace Migrations.Migrations
                     b.HasOne("DataLib.Article", "Article")
                         .WithMany()
                         .HasForeignKey("ProductUid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("DataLib.User", "User")
                         .WithMany()
                         .HasForeignKey("UserUid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Article");
@@ -992,19 +992,19 @@ namespace Migrations.Migrations
                     b.HasOne("DataLib.Machine", "Machine")
                         .WithMany()
                         .HasForeignKey("MachineUid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("DataLib.Article", "Article")
                         .WithMany()
                         .HasForeignKey("ProductUid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("DataLib.User", "User")
                         .WithMany()
                         .HasForeignKey("UserUid")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Article");

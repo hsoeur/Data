@@ -12,11 +12,20 @@ namespace GenDb.Generators
     {
         private readonly AppDbContext _context;
         private readonly string _csvPath;
+        private readonly ILogger _logger;
 
         public ProductFirmwareGenerator(AppDbContext context, IConfiguration configuration)
         {
             _context = context;
             _csvPath = configuration["CsvPaths:FirmwareVersions"] ?? "C:\\Data\\Export_GPAO\\EXPORT_BDDPROD_COMP.csv";
+
+            var logDir = Path.Combine("logs", $"{DateTime.Now:yyyyMMdd}");
+            Directory.CreateDirectory(logDir);
+            var filePath = Path.Combine(logDir, "ProductFirmwareGenerator.log");
+            _logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.File(filePath, retainedFileCountLimit: null, shared: true)
+                .CreateLogger();
         }
 
         public void Update()
@@ -27,7 +36,7 @@ namespace GenDb.Generators
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "ProductFirmwareGenerator::Update() => Impossible d'importer les données.");
+                _logger.Error(ex, "ProductFirmwareGenerator::Update() => Impossible d'importer les données.");
             }
         }
 
@@ -42,34 +51,46 @@ namespace GenDb.Generators
                 catch (Exception ex)
                 {
                     transaction.Rollback();
-                    Log.Error(ex, "ProductFirmwareGenerator::Update() => Transaction interrompue.");
+                    _logger.Error(ex, "ProductFirmwareGenerator::Update() => Transaction interrompue.");
                 }
             }
         }
 
         private void ImportData(AppDbContext context, IDbContextTransaction transaction)
         {
-            List<string[]> stringVersions = CsvParser.Parse(_csvPath);
-            context.FirmwareVersions.RemoveRange(context.FirmwareVersions.ToList());
-            context.SaveChanges();
+            var rows = CsvParser.Parse(_csvPath);
+            var existing = context.FirmwareVersions.ToList().GroupBy(v => (v.ArticleUid, v.Version)).ToDictionary(g => g.Key, g => g.First());
+            int inserted =0, skipped =0;
 
-            foreach (var stringVersion in stringVersions)
+            foreach (var row in rows)
             {
-                if (stringVersion.Length <2) continue;
+                if (row.Length <2)
+                { skipped++; _logger.Warning("Skip {Entity} Reason={Reason} RawLine={RawLine}", "FirmwareVersion", "Colonnes insuffisantes", string.Join("|", row)); continue; }
+                var articleUid = row[0]; var version = row[1];
+                if (string.IsNullOrWhiteSpace(articleUid) || string.IsNullOrWhiteSpace(version))
+                { skipped++; _logger.Warning("Skip {Entity} Reason={Reason} RawLine={RawLine}", "FirmwareVersion", "ArticleUid/Version manquants", string.Join("|", row)); continue; }
+                var key = (articleUid, version);
 
-                context.FirmwareVersions.Add(new FirmwareVersion()
+                if (!existing.ContainsKey(key))
                 {
-                    FirmwareVersionUid = Guid.NewGuid().ToString(),
-                    ArticleUid = stringVersion[0],
-                    Version = stringVersion[1]
-                });
-
-                Console.WriteLine($"UIDArticle: {stringVersion[0]}, Version: {stringVersion[1]}");
+                    context.FirmwareVersions.Add(new FirmwareVersion()
+                    {
+                        FirmwareVersionUid = Guid.NewGuid().ToString(),
+                        ArticleUid = articleUid,
+                        Version = version
+                    });
+                    inserted++;
+                    _logger.Information("Insert {Entity} Key=({ArticleUid},{Version})", "FirmwareVersion", articleUid, version);
+                }
+                else
+                {
+                    _logger.Information("NoChange {Entity} Key=({ArticleUid},{Version})", "FirmwareVersion", articleUid, version);
+                }
             }
 
             context.SaveChanges();
             transaction.Commit();
-            Log.Information("ProductFirmwareGenerator::Update() => Transaction effectuée.");
+            _logger.Information("Summary {Entity} Inserted={Inserted} Skipped={Skipped}", "FirmwareVersion", inserted, skipped);
         }
     }
 }

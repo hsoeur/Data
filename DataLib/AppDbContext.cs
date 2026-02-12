@@ -42,7 +42,17 @@ namespace DataLib
             // Let EF Core infer the model from data annotations in ManufacturingOrder
             base.OnModelCreating(modelBuilder);
 
-        
+            // Disable cascade delete globally to avoid unintended deletions during GenDb updates
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach (var fk in entityType.GetForeignKeys())
+                {
+                    if (fk.DeleteBehavior == DeleteBehavior.Cascade)
+                    {
+                        fk.DeleteBehavior = DeleteBehavior.Restrict;
+                    }
+                }
+            }
         }
     }
 }

@@ -13,11 +13,20 @@ namespace GenDb.Generators
     {
         private readonly AppDbContext _context;
         private readonly string _csvPath;
+        private readonly ILogger _logger;
 
         public UserGenerator(AppDbContext context, IConfiguration configuration)
         {
             _context = context;
             _csvPath = configuration["CsvPaths:Users"] ?? "C:\\Data\\Export_GPAO\\EXPORT_BDDPROD_OPE.CSV";
+
+            var logDir = Path.Combine("logs", $"{DateTime.Now:yyyyMMdd}");
+            Directory.CreateDirectory(logDir);
+            var filePath = Path.Combine(logDir, "UserGenerator.log");
+            _logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.File(filePath, retainedFileCountLimit: null, shared: true)
+                .CreateLogger();
         }
         public void Update()
         {
@@ -27,7 +36,7 @@ namespace GenDb.Generators
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "UserGenerator::Update() => Impossible d'importer les données.");
+                _logger.Error(ex, "UserGenerator::Update() => Impossible d'importer les données.");
             }
         }
 
@@ -42,7 +51,7 @@ namespace GenDb.Generators
                 catch (Exception ex)
                 {
                     transaction.Rollback();
-                    Log.Error(ex, "UserGenerator::Update() => Transaction interrompue.");
+                    _logger.Error(ex, "UserGenerator::Update() => Transaction interrompue.");
                 }
             }
         }
@@ -70,31 +79,87 @@ namespace GenDb.Generators
         private void ImportData(AppDbContext context, IDbContextTransaction transaction)
         {
             List<string[]> stringOpes = CsvParser.Parse(_csvPath);
+            var existing = context.Users
+                .ToList()
+                .ToDictionary(u => u.UserUid, u => u);
 
-            context.Users.RemoveRange(context.Users.ToList());
-            context.SaveChanges();
+            int inserted =0, updated =0, skipped =0;
 
-            foreach (var stringOpe in stringOpes)
+            foreach (var row in stringOpes)
             {
-                if (stringOpe.Length <6)
-                    continue;
-
-                context.Users.Add(new User()
+                // Validation structurée par ligne
+                if (row.Length <6)
                 {
-                    UserUid = stringOpe[0],
-                    LastName = stringOpe[1],
-                    FirstName = stringOpe[2],
-                    EntryDate = ParseDate(stringOpe[3]),
-                    ExitDate = ParseDate(stringOpe[4]),
-                    Department = stringOpe[5]
-                });
+                    skipped++;
+                    _logger.Warning("Skip {Entity} Reason={Reason} RawLine={RawLine}", "User", "Colonnes insuffisantes", string.Join("|", row));
+                    continue;
+                }
+                var uid = row[0];
+                if (string.IsNullOrWhiteSpace(uid))
+                {
+                    skipped++;
+                    _logger.Warning("Skip {Entity} Reason={Reason} RawLine={RawLine}", "User", "UserUid manquant", string.Join("|", row));
+                    continue;
+                }
 
-                Console.WriteLine($"UIDOperateur: {stringOpe[0]}, Nom: {stringOpe[1]}, Prenom: {stringOpe[2]}, DateEntree: {stringOpe[3]}");
+                var ln = row[1];
+                var fn = row[2];
+                var entry = ParseDate(row[3]);
+                var exit = ParseDate(row[4]);
+                var dep = row[5];
+
+                if (existing.TryGetValue(uid, out var user))
+                {
+                    bool anyChange = false;
+                    if (user.LastName != ln)
+                    {
+                        _logger.Information("Update {Entity} {Uid} Field={Field} Old={Old} New={New}", "User", uid, "LastName", user.LastName, ln);
+                        user.LastName = ln; anyChange = true;
+                    }
+                    if (user.FirstName != fn)
+                    {
+                        _logger.Information("Update {Entity} {Uid} Field={Field} Old={Old} New={New}", "User", uid, "FirstName", user.FirstName, fn);
+                        user.FirstName = fn; anyChange = true;
+                    }
+                    if (user.EntryDate != entry)
+                    {
+                        _logger.Information("Update {Entity} {Uid} Field={Field} Old={Old} New={New}", "User", uid, "EntryDate", user.EntryDate, entry);
+                        user.EntryDate = entry; anyChange = true;
+                    }
+                    if (user.ExitDate != exit)
+                    {
+                        _logger.Information("Update {Entity} {Uid} Field={Field} Old={Old} New={New}", "User", uid, "ExitDate", user.ExitDate, exit);
+                        user.ExitDate = exit; anyChange = true;
+                    }
+                    if (user.Department != dep)
+                    {
+                        _logger.Information("Update {Entity} {Uid} Field={Field} Old={Old} New={New}", "User", uid, "Department", user.Department, dep);
+                        user.Department = dep; anyChange = true;
+                    }
+                    if (anyChange) updated++;
+                    else _logger.Information("NoChange {Entity} {Uid}", "User", uid);
+                }
+                else
+                {
+                    context.Users.Add(new User()
+                    {
+                        UserUid = uid,
+                        LastName = ln,
+                        FirstName = fn,
+                        EntryDate = entry,
+                        ExitDate = exit,
+                        Department = dep
+                    });
+                    inserted++;
+                    _logger.Information("Insert {Entity} {Uid} LastName={LastName} FirstName={FirstName} EntryDate={EntryDate} ExitDate={ExitDate} Department={Department}",
+                     "User", uid, ln, fn, entry, exit, dep);
+                }
             }
 
             context.SaveChanges();
             transaction.Commit();
-            Log.Information("UserGenerator::Update() => Transaction effectuée.");
+
+            _logger.Information("Summary {Entity} Inserted={Inserted} Updated={Updated} Skipped={Skipped}", "User", inserted, updated, skipped);
         }
     }
 }

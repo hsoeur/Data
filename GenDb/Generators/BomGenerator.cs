@@ -13,11 +13,20 @@ namespace GenDb.Generators
     {
         private readonly AppDbContext _context;
         private readonly string _csvPath;
+        private readonly ILogger _logger;
 
         public BomGenerator(AppDbContext context, IConfiguration configuration)
         {
             _context = context;
             _csvPath = configuration["CsvPaths:BillOfMaterials"] ?? "C:\\Data\\Export_GPAO\\EXPORT_BDDPROD_NOM.CSV";
+
+            var logDir = Path.Combine("logs", $"{DateTime.Now:yyyyMMdd}");
+            Directory.CreateDirectory(logDir);
+            var filePath = Path.Combine(logDir, "BomGenerator.log");
+            _logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.File(filePath, retainedFileCountLimit: null, shared: true)
+                .CreateLogger();
         }
 
         public void Update()
@@ -28,7 +37,7 @@ namespace GenDb.Generators
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "BomGenerator::Update() => Impossible d'importer les données.");
+                _logger.Error(ex, "BomGenerator::Update() => Impossible d'importer les données.");
             }
         }
 
@@ -43,73 +52,69 @@ namespace GenDb.Generators
                 catch (Exception ex)
                 {
                     transaction.Rollback();
-                    Log.Error(ex, "BomGenerator::GenerateTable() => Transaction interrompue.");
+                    _logger.Error(ex, "BomGenerator::GenerateTable() => Transaction interrompue.");
                 }
             }
         }
 
         private static DateTimeOffset ParseDate(string? raw)
         {
-            if (string.IsNullOrWhiteSpace(raw))
-                return DateTimeOffset.UtcNow;
-
+            if (string.IsNullOrWhiteSpace(raw)) return DateTimeOffset.UtcNow;
             var styles = DateTimeStyles.AssumeLocal | DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AdjustToUniversal;
-
-            // Try common cultures first (fr-FR then invariant)
             if (DateTimeOffset.TryParse(raw, new CultureInfo("fr-FR"), styles, out var dto)) return dto;
             if (DateTimeOffset.TryParse(raw, CultureInfo.InvariantCulture, styles, out dto)) return dto;
-
-            // Try a set of common formats
-            string[] formats = new[]
-            {
-                "dd/MM/yyyy", "dd/MM/yyyy HH:mm:ss", "dd-MM-yyyy", "dd-MM-yyyy HH:mm:ss",
-                "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "yyyyMMdd", "yyyyMMddHHmmss"
-            };
+            string[] formats = new[] { "dd/MM/yyyy", "dd/MM/yyyy HH:mm:ss", "dd-MM-yyyy", "dd-MM-yyyy HH:mm:ss", "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "yyyyMMdd", "yyyyMMddHHmmss" };
             if (DateTimeOffset.TryParseExact(raw, formats, CultureInfo.InvariantCulture, styles, out dto)) return dto;
-
             return DateTimeOffset.UtcNow;
         }
 
         private void ImportData(AppDbContext context, IDbContextTransaction transaction)
         {
-            try
+            var rows = CsvParser.Parse(_csvPath);
+            var existing = context.BillOfMaterials.ToList().GroupBy(b => (b.Product, b.Component, b.Operation)).ToDictionary(g => g.Key, g => g.First());
+            int inserted =0, updated =0, skipped =0;
+
+            foreach (var row in rows)
             {
-                List<string[]> stringsNomenclatures = CsvParser.Parse(_csvPath);
-                // Purge table avant import
-                context.BillOfMaterials.RemoveRange(context.BillOfMaterials.ToList());
-                context.SaveChanges();
+                if (row.Length <7)
+                { skipped++; _logger.Warning("Skip {Entity} Reason={Reason} RawLine={RawLine}", "BillOfMaterial", "Colonnes insuffisantes", string.Join("|", row)); continue; }
+                var product = row[0]; var component = row[1]; var operation = row[2];
+                if (string.IsNullOrWhiteSpace(product) || string.IsNullOrWhiteSpace(component))
+                { skipped++; _logger.Warning("Skip {Entity} Reason={Reason} RawLine={RawLine}", "BillOfMaterial", "Product/Component manquants", string.Join("|", row)); continue; }
+                var key = (product, component, operation);
+                var quantity = row[3]; var quantityDiv = row[4]; var creationDate = ParseDate(row[5]); var endDate = ParseDate(row[6]);
 
-                foreach (var stringNomenclature in stringsNomenclatures)
+                if (existing.TryGetValue(key, out var bom))
                 {
-                    // Sécuriser l'accès aux index
-                    if (stringNomenclature.Length <7)
-                        continue;
-
-                    var bom = new BillOfMaterial()
+                    bool anyChange = false;
+                    if (bom.Quantity != quantity) { _logger.Information("Update {Entity} Key=({Product},{Component},{Operation}) Field={Field} Old={Old} New={New}", "BillOfMaterial", product, component, operation, "Quantity", bom.Quantity, quantity); bom.Quantity = quantity; anyChange = true; }
+                    if (bom.QuantityDiv != quantityDiv) { _logger.Information("Update {Entity} Key=({Product},{Component},{Operation}) Field={Field} Old={Old} New={New}", "BillOfMaterial", product, component, operation, "QuantityDiv", bom.QuantityDiv, quantityDiv); bom.QuantityDiv = quantityDiv; anyChange = true; }
+                    if (bom.CreationDate != creationDate) { _logger.Information("Update {Entity} Key=({Product},{Component},{Operation}) Field={Field} Old={Old} New={New}", "BillOfMaterial", product, component, operation, "CreationDate", bom.CreationDate, creationDate); bom.CreationDate = creationDate; anyChange = true; }
+                    if (bom.EndDate != endDate) { _logger.Information("Update {Entity} Key=({Product},{Component},{Operation}) Field={Field} Old={Old} New={New}", "BillOfMaterial", product, component, operation, "EndDate", bom.EndDate, endDate); bom.EndDate = endDate; anyChange = true; }
+                    if (anyChange) updated++; else _logger.Information("NoChange {Entity} Key=({Product},{Component},{Operation})", "BillOfMaterial", product, component, operation);
+                }
+                else
+                {
+                    context.BillOfMaterials.Add(new BillOfMaterial()
                     {
                         BillOfMaterialsUid = Guid.NewGuid().ToString(),
-                        Product = stringNomenclature[0],
-                        Component = stringNomenclature[1],
-                        Operation = stringNomenclature[2],
-                        Quantity = stringNomenclature[3],
-                        QuantityDiv = stringNomenclature[4],
-                        CreationDate = ParseDate(stringNomenclature[5]),
-                        EndDate = ParseDate(stringNomenclature[6])
-                    };
-
-                    context.BillOfMaterials.Add(bom);
-
-                    Console.WriteLine($"Compound: {bom.Product}, Component: {bom.Component}, Operation: {bom.Operation}, Quantite: {bom.Quantity}");
+                        Product = product,
+                        Component = component,
+                        Operation = operation,
+                        Quantity = quantity,
+                        QuantityDiv = quantityDiv,
+                        CreationDate = creationDate,
+                        EndDate = endDate
+                    });
+                    inserted++;
+                    _logger.Information("Insert {Entity} Key=({Product},{Component},{Operation}) Quantity={Quantity} QuantityDiv={QuantityDiv} CreationDate={CreationDate} EndDate={EndDate}",
+                     "BillOfMaterial", product, component, operation, quantity, quantityDiv, creationDate, endDate);
                 }
+            }
 
-                context.SaveChanges();
-                transaction.Commit();
-                Log.Information("BomGenerator::Update() => Transaction effectuée.");
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "BomGenerator::Update() => Transaction interrompue.");
-            }
+            context.SaveChanges();
+            transaction.Commit();
+            _logger.Information("Summary {Entity} Inserted={Inserted} Updated={Updated} Skipped={Skipped}", "BillOfMaterial", inserted, updated, skipped);
         }
     }
 }

@@ -13,11 +13,20 @@ namespace GenDb.Generators
     {
         private readonly AppDbContext _context;
         private readonly string _csvPath;
+        private readonly ILogger _logger;
 
         public ArticleGenerator(AppDbContext context, IConfiguration configuration)
         {
             _context = context;
             _csvPath = configuration["CsvPaths:Articles"] ?? Path.Combine(Directory.GetCurrentDirectory(), "EXPORT_GPAO", "EXPORT_BDDPROD_ART.CSV");
+
+            var logDir = Path.Combine("logs", $"{DateTime.Now:yyyyMMdd}");
+            Directory.CreateDirectory(logDir);
+            var filePath = Path.Combine(logDir, "ArticleGenerator.log");
+            _logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.File(filePath, retainedFileCountLimit: null, shared: true)
+                .CreateLogger();
         }
 
         public void Update()
@@ -28,9 +37,7 @@ namespace GenDb.Generators
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Exception outside of the transaction: {ex}");
-                Log.Error(ex, "ArticleGenerator::Update() => Transaction interrompue.");
-
+                _logger.Error(ex, "ArticleGenerator::Update() => Transaction interrompue.");
             }
         }
 
@@ -41,63 +48,64 @@ namespace GenDb.Generators
                 try
                 {
                     ImportData(_context, transaction);
-
                 }
                 catch (Exception ex)
                 {
                     transaction.Rollback();
-                    Log.Error(ex, "ArticleGenerator::GenerateTable() => Transaction interrompue.");
-
+                    _logger.Error(ex, "ArticleGenerator::GenerateTable() => Transaction interrompue.");
                 }
             }
         }
 
         private void ImportData(AppDbContext context, IDbContextTransaction transaction)
         {
-            List<string[]> stringArticles = CsvParser.Parse(_csvPath);
+            var rows = CsvParser.Parse(_csvPath);
+            var existing = context.Articles.ToList().ToDictionary(a => a.ArticleUid, a => a);
+            int inserted =0, updated =0, skipped =0;
 
-
-
-            // Supprimer les articles existants avant d'insérer les nouveaux
-            context.Articles.RemoveRange(context.Articles
-                .ToList());
-
-            context.SaveChanges(); // Appliquer la suppression avant d'insérer les nouveaux articles
-
-            foreach (var stringArticle in stringArticles)
+            foreach (var row in rows)
             {
-                var existingArticle = context.Articles.FirstOrDefault(a => a.ArticleUid == stringArticle[0]);
+                if (row.Length <7)
+                { skipped++; _logger.Warning("Skip {Entity} Reason={Reason} RawLine={RawLine}", "Article", "Colonnes insuffisantes", string.Join("|", row)); continue; }
+                var uid = row[0];
+                if (string.IsNullOrWhiteSpace(uid))
+                { skipped++; _logger.Warning("Skip {Entity} Reason={Reason} RawLine={RawLine}", "Article", "ArticleUid manquant", string.Join("|", row)); continue; }
+                int gpaoQuantity =0; if (row.Length >7) int.TryParse(row[7], out gpaoQuantity);
 
-                if (existingArticle != null)
+                if (existing.TryGetValue(uid, out var a))
                 {
-                    // Si l'article existe on le garde tel quel
-                    continue;
+                    bool anyChange = false;
+                    if (a.Designation != row[1]) { _logger.Information("Update {Entity} {Uid} Field={Field} Old={Old} New={New}", "Article", uid, "Designation", a.Designation, row[1]); a.Designation = row[1]; anyChange = true; }
+                    if (a.Store != row[2]) { _logger.Information("Update {Entity} {Uid} Field={Field} Old={Old} New={New}", "Article", uid, "Store", a.Store, row[2]); a.Store = row[2]; anyChange = true; }
+                    if (a.Family != row[3]) { _logger.Information("Update {Entity} {Uid} Field={Field} Old={Old} New={New}", "Article", uid, "Family", a.Family, row[3]); a.Family = row[3]; anyChange = true; }
+                    if (a.Packaging != row[4]) { _logger.Information("Update {Entity} {Uid} Field={Field} Old={Old} New={New}", "Article", uid, "Packaging", a.Packaging, row[4]); a.Packaging = row[4]; anyChange = true; }
+                    if (a.ManageStock != row[5]) { _logger.Information("Update {Entity} {Uid} Field={Field} Old={Old} New={New}", "Article", uid, "ManageStock", a.ManageStock, row[5]); a.ManageStock = row[5]; anyChange = true; }
+                    if (a.SupplierReference != row[6]) { _logger.Information("Update {Entity} {Uid} Field={Field} Old={Old} New={New}", "Article", uid, "SupplierReference", a.SupplierReference, row[6]); a.SupplierReference = row[6]; anyChange = true; }
+                    if (a.GpaoQuantity != gpaoQuantity) { _logger.Information("Update {Entity} {Uid} Field={Field} Old={Old} New={New}", "Article", uid, "GpaoQuantity", a.GpaoQuantity, gpaoQuantity); a.GpaoQuantity = gpaoQuantity; anyChange = true; }
+                    if (anyChange) updated++; else _logger.Information("NoChange {Entity} {Uid}", "Article", uid);
                 }
-
-                int gpaoQuantity =0;
-                if (stringArticle.Length >7)
+                else
                 {
-                    int.TryParse(stringArticle[7], out gpaoQuantity);
+                    context.Articles.Add(new Article()
+                    {
+                        ArticleUid = uid,
+                        Designation = row[1],
+                        Store = row[2],
+                        Family = row[3],
+                        Packaging = row[4],
+                        ManageStock = row[5],
+                        SupplierReference = row[6],
+                        GpaoQuantity = gpaoQuantity,
+                    });
+                    inserted++;
+                    _logger.Information("Insert {Entity} {Uid} Designation={Designation} Store={Store} Family={Family} Packaging={Packaging} ManageStock={ManageStock} SupplierReference={SupplierReference} GpaoQuantity={GpaoQuantity}",
+                     "Article", uid, row[1], row[2], row[3], row[4], row[5], row[6], gpaoQuantity);
                 }
-
-                context.Articles.Add(new Article()
-                {
-                    ArticleUid = stringArticle[0],
-                    Designation = stringArticle[1],
-                    Store = stringArticle[2],
-                    Family = stringArticle[3],
-                    Packaging = stringArticle[4],
-                    ManageStock = stringArticle[5],
-                    SupplierReference = stringArticle[6],
-                    GpaoQuantity = gpaoQuantity,
-                });
-
-                Console.WriteLine($"Code: {stringArticle[0]}, Description: {stringArticle[1]}, Référence: {stringArticle[2]}");
             }
 
             context.SaveChanges();
             transaction.Commit();
-            Log.Information("ArticlesGenerator::Update() => Transaction effectuée.");
+            _logger.Information("Summary {Entity} Inserted={Inserted} Updated={Updated} Skipped={Skipped}", "Article", inserted, updated, skipped);
         }
     }
 }

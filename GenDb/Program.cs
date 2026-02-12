@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Diagnostics;
 using Migrations;
+using Serilog;
 
 internal class Program
 {
@@ -14,6 +15,7 @@ internal class Program
 
         try
         {
+            ConfigureLogging();
             int result = InstanciateAndGenerateDb();
             stopwatch.Stop();
 
@@ -27,6 +29,31 @@ internal class Program
             stopwatch.Stop();
             Console.WriteLine("Le fichier de configuration appsettings.json n'a pas été trouvé.");
             return -1;
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
+    }
+
+    private static void ConfigureLogging()
+    {
+        try
+        {
+            var dateFolder = $"{DateTime.Now:yyyyMMdd}";
+            var logDir = Path.Combine("logs", dateFolder);
+            Directory.CreateDirectory(logDir);
+            var logFile = Path.Combine(logDir, "gen_db.log");
+
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.Console()
+                .WriteTo.File(logFile, rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null, shared: true)
+                .CreateLogger();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Configuration du logging échouée: {ex.Message}");
         }
     }
 

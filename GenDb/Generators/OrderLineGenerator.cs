@@ -12,11 +12,20 @@ namespace GenDb.Generators
     {
         private readonly AppDbContext _context;
         private readonly string _csvPath;
+        private readonly ILogger _logger;
 
         public OrderLineGenerator(AppDbContext context, IConfiguration configuration)
         {
             _context = context;
             _csvPath = configuration["CsvPaths:OrderLines"] ?? "C:\\Data\\Export_GPAO\\EXPORT_BDDPROD_CMLIG.CSV";
+
+            var logDir = Path.Combine("logs", $"{DateTime.Now:yyyyMMdd}");
+            Directory.CreateDirectory(logDir);
+            var filePath = Path.Combine(logDir, "OrderLineGenerator.log");
+            _logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.File(filePath, retainedFileCountLimit: null, shared: true)
+                .CreateLogger();
         }
 
         public void Update()
@@ -27,8 +36,7 @@ namespace GenDb.Generators
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Exception outside of the transaction: {ex}");
-                Log.Error(ex, "OrderLineGenerator::Update() => Transaction interrompue.");
+                _logger.Error(ex, "OrderLineGenerator::Update() => Transaction interrompue.");
             }
         }
 
@@ -43,39 +51,58 @@ namespace GenDb.Generators
                 catch (Exception ex)
                 {
                     transaction.Rollback();
-                    Log.Error(ex, "OrderLineGenerator::GenerateTable() => Transaction interrompue.");
+                    _logger.Error(ex, "OrderLineGenerator::GenerateTable() => Transaction interrompue.");
                 }
             }
         }
 
         private void ImportData(AppDbContext context, IDbContextTransaction transaction)
         {
-            List<string[]> stringOrderLines = CsvParser.Parse(_csvPath);
+            var rows = CsvParser.Parse(_csvPath);
+            var existing = context.OrderLines.ToList().ToDictionary(o => o.UidOrderLine, o => o);
+            int inserted = 0, updated = 0, skipped = 0;
 
-            context.OrderLines.RemoveRange(context.OrderLines.ToList());
-            context.SaveChanges();
-
-            foreach (var stringOrderLine in stringOrderLines)
+            foreach (var row in rows)
             {
-                int quantity =0;
-                if (stringOrderLine.Length >2)
+                if (row.Length < 3)
                 {
-                    int.TryParse(stringOrderLine[2], out quantity);
+                    skipped++;
+                    _logger.Warning("Skip {Entity} Reason={Reason} RawLine={RawLine}", "OrderLine", "Colonnes insuffisantes", string.Join("|", row));
+                    continue;
                 }
-
-                context.OrderLines.Add(new OrderLine()
+                var uid = row[0];
+                if (string.IsNullOrWhiteSpace(uid))
                 {
-                    UidOrderLine = stringOrderLine[0],
-                    Product = stringOrderLine[1],
-                    Quantity = quantity,
-                });
+                    skipped++;
+                    _logger.Warning("Skip {Entity} Reason={Reason} RawLine={RawLine}", "OrderLine", "Uid manquant", string.Join("|", row));
+                    continue;
+                }
+                int quantity = 0;
+                int.TryParse(row[2], out quantity);
 
-                Console.WriteLine($"Code: {stringOrderLine[0]}, Description: {stringOrderLine[1]}, Référence: {stringOrderLine[2]}");
+                if (existing.TryGetValue(uid, out var ol))
+                {
+                    bool anyChange = false;
+                    if (ol.Product != row[1]) { _logger.Information("Update {Entity} {Uid} Field={Field} Old={Old} New={New}", "OrderLine", uid, "Product", ol.Product, row[1]); ol.Product = row[1]; anyChange = true; }
+                    if (ol.Quantity != quantity) { _logger.Information("Update {Entity} {Uid} Field={Field} Old={Old} New={New}", "OrderLine", uid, "Quantity", ol.Quantity, quantity); ol.Quantity = quantity; anyChange = true; }
+                    if (anyChange) updated++; else _logger.Information("NoChange {Entity} {Uid}", "OrderLine", uid);
+                }
+                else
+                {
+                    context.OrderLines.Add(new OrderLine()
+                    {
+                        UidOrderLine = uid,
+                        Product = row[1],
+                        Quantity = quantity,
+                    });
+                    inserted++;
+                    _logger.Information("Insert {Entity} {Uid} Product={Product} Quantity={Quantity}", "OrderLine", uid, row[1], quantity);
+                }
             }
 
             context.SaveChanges();
             transaction.Commit();
-            Log.Information("OrderLineGenerator::Update() => Transaction effectuée.");
+            _logger.Information("Summary {Entity} Inserted={Inserted} Updated={Updated} Skipped={Skipped}", "OrderLine", inserted, updated, skipped);
         }
     }
 }

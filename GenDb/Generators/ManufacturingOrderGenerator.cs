@@ -12,11 +12,20 @@ namespace GenDb.Generators
     {
         private readonly AppDbContext _context;
         private readonly string _csvPath;
+        private readonly ILogger _logger;
 
         public ManufacturingOrderGenerator(AppDbContext context, IConfiguration configuration)
         {
             _context = context;
             _csvPath = configuration["CsvPaths:ManufacturingOrders"] ?? "C:\\Data\\Export_GPAO\\EXPORT_BDDPROD_OF.CSV";
+
+            var logDir = Path.Combine("logs", $"logsavecla{DateTime.Now:yyyyMMdd}");
+            Directory.CreateDirectory(logDir);
+            var filePath = Path.Combine(logDir, "ManufacturingOrderGenerator.log");
+            _logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.File(filePath, retainedFileCountLimit: null, shared: true)
+                .CreateLogger();
         }
 
         public void Update()
@@ -27,7 +36,7 @@ namespace GenDb.Generators
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "ManufacturingOrderGenerator::Update() => Impossible d'importer les données.");
+                _logger.Error(ex, "ManufacturingOrderGenerator::Update() => Impossible d'importer les données.");
             }
         }
 
@@ -42,7 +51,7 @@ namespace GenDb.Generators
                 catch (Exception ex)
                 {
                     transaction.Rollback();
-                    Log.Error(ex, "ManufacturingOrderGenerator::Update() => Transaction annulée.");
+                    _logger.Error(ex, "ManufacturingOrderGenerator::Update() => Transaction annulée.");
                 }
             }
         }
@@ -51,77 +60,60 @@ namespace GenDb.Generators
         {
             try
             {
-                List<string[]> stringOFs = CsvParser.Parse(_csvPath);
-                var existingOFs = context.ManufacturingOrders.ToDictionary(of => of.ManufacturingOrderUid);
-                var csvManufacturingOrderUids = new HashSet<int>();
+                var rows = CsvParser.Parse(_csvPath);
+                var existing = context.ManufacturingOrders.ToDictionary(of => of.ManufacturingOrderUid);
+                int inserted =0, updated =0, skipped =0;
 
-                foreach (var stringOF in stringOFs)
+                foreach (var row in rows)
                 {
-                    if (stringOF.Length < 6)
-                        continue;
+                    if (row.Length <6)
+                    { skipped++; _logger.Warning("Skip {Entity} Reason={Reason} RawLine={RawLine}", "ManufacturingOrder", "Colonnes insuffisantes", string.Join("|", row)); continue; }
+                    if (!int.TryParse(row[0], out var uid))
+                    { skipped++; _logger.Warning("Skip {Entity} Reason={Reason} RawLine={RawLine}", "ManufacturingOrder", "Uid invalide", string.Join("|", row)); continue; }
+                    var productUid = row[1];
+                    int.TryParse(row[2], out var quantity);
+                    int.TryParse(row[3], out var firstSerialNumber);
+                    var internalOrder = row[4] ?? string.Empty;
+                    var externalOrder = row[5] ?? string.Empty;
 
-                    if (!int.TryParse(stringOF[0], out var manufacturingOrderUid))
-                        continue;
-                    csvManufacturingOrderUids.Add(manufacturingOrderUid);
-
-                    var productUid = stringOF[1];
-                    int.TryParse(stringOF[2], out var quantity);
-                    int.TryParse(stringOF[3], out var firstSerialNumber);
-                    var horizonOrder = stringOF[4] ?? string.Empty;
-                    var amphitechOrder = stringOF[5] ?? string.Empty;
-
-                    if (existingOFs.TryGetValue(manufacturingOrderUid, out var existingOF))
+                    if (existing.TryGetValue(uid, out var of))
                     {
-                        LogDifferences(existingOF, productUid, quantity, firstSerialNumber, horizonOrder, amphitechOrder);
+                        // Log differences only, do not update existing records
+                        bool anyChange = false;
+                        if (of.ProductUid != productUid) { _logger.Information("Diff {Entity} {Uid} Field={Field} Old={Old} New={New}", "ManufacturingOrder", uid, "ProductUid", of.ProductUid, productUid); anyChange = true; }
+                        if (of.Quantity != quantity) { _logger.Information("Diff {Entity} {Uid} Field={Field} Old={Old} New={New}", "ManufacturingOrder", uid, "Quantity", of.Quantity, quantity); anyChange = true; }
+                        if (of.FirstSerialNumber != firstSerialNumber) { _logger.Information("Diff {Entity} {Uid} Field={Field} Old={Old} New={New}", "ManufacturingOrder", uid, "FirstSerialNumber", of.FirstSerialNumber, firstSerialNumber); anyChange = true; }
+                        if (of.InternalOrderNumber != internalOrder) { _logger.Information("Diff {Entity} {Uid} Field={Field} Old={Old} New={New}", "ManufacturingOrder", uid, "InternalOrderNumber", of.InternalOrderNumber, internalOrder); anyChange = true; }
+                        if (of.ExternalOrderNumber != externalOrder) { _logger.Information("Diff {Entity} {Uid} Field={Field} Old={Old} New={New}", "ManufacturingOrder", uid, "ExternalOrderNumber", of.ExternalOrderNumber, externalOrder); anyChange = true; }
+                        if (anyChange) updated++; else _logger.Information("NoChange {Entity} {Uid}", "ManufacturingOrder", uid);
                     }
                     else
                     {
                         var newOF = new ManufacturingOrder()
                         {
-                            ManufacturingOrderUid = manufacturingOrderUid,
+                            ManufacturingOrderUid = uid,
                             ProductUid = productUid,
                             Quantity = quantity,
                             FirstSerialNumber = firstSerialNumber,
-                            InternalOrderNumber = horizonOrder,
-                            ExternalOrderNumber = amphitechOrder,
+                            InternalOrderNumber = internalOrder,
+                            ExternalOrderNumber = externalOrder,
                             Status = "CREATED"
                         };
                         context.ManufacturingOrders.Add(newOF);
+                        inserted++;
+                        _logger.Information("Insert {Entity} {Uid} ProductUid={ProductUid} Quantity={Quantity} FirstSerialNumber={FirstSerialNumber} InternalOrderNumber={InternalOrderNumber} ExternalOrderNumber={ExternalOrderNumber}", "ManufacturingOrder", uid, productUid, quantity, firstSerialNumber, internalOrder, externalOrder);
                     }
-                }
-
-                var ofToDelete = existingOFs
-                    .Where(kv => kv.Value.Status != "ACTIVE" && !csvManufacturingOrderUids.Contains(kv.Key))
-                    .Select(kv => kv.Value)
-                    .ToList();
-                foreach (var of in ofToDelete)
-                {
-                    context.ManufacturingOrders.Remove(of);
                 }
 
                 context.SaveChanges();
                 transaction.Commit();
-                Log.Information("Transaction validée avec succès.");
+                _logger.Information("Summary {Entity} Inserted={Inserted} Updated(LogOnly)={Updated} Skipped={Skipped}", "ManufacturingOrder", inserted, updated, skipped);
             }
             catch (Exception ex)
             {
                 transaction.Rollback();
-                Log.Error(ex, "Une erreur s'est produite lors de l'importation des données. Transaction annulée.");
+                _logger.Error(ex, "ManufacturingOrderGenerator::ImportData() => Erreur import.");
                 throw;
-            }
-        }
-
-        private void LogDifferences(ManufacturingOrder existingOF, string productUid, int quantity, int firstSerialNumber, string internalOrder, string externalOrder)
-        {
-            List<string> differences = new();
-            if (existingOF.ProductUid != productUid) differences.Add($"Produit UID différent - Ancien: {existingOF.ProductUid}, Nouveau: {productUid}");
-            if (existingOF.Quantity != quantity) differences.Add($"Quantité différente - Ancien: {existingOF.Quantity}, Nouveau: {quantity}");
-            if (existingOF.FirstSerialNumber != firstSerialNumber) differences.Add($"Numéro de série premier différent - Ancien: {existingOF.FirstSerialNumber}, Nouveau: {firstSerialNumber}");
-            if (existingOF.InternalOrderNumber != internalOrder) differences.Add($"Commande Horizon différente - Ancien: {existingOF.InternalOrderNumber}, Nouveau: {internalOrder}");
-            if (existingOF.ExternalOrderNumber != externalOrder) differences.Add($"Commande Amphitech différente - Ancien: {existingOF.ExternalOrderNumber}, Nouveau: {externalOrder}");
-            if (differences.Any())
-            {
-                Log.Warning($"OF {existingOF.ManufacturingOrderUid} a des différences détectées:\n{string.Join("\n", differences)}");
             }
         }
     }
