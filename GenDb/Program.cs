@@ -16,23 +16,36 @@ internal class Program
         try
         {
             ConfigureLogging();
+            Console.WriteLine("GenDb démarré. Les logs s'affichent ci-dessous et sont écrits dans le dossier logs.");
+            Log.Information("GenDb starting up");
+            Log.Information("WorkingDirectory={WorkingDirectory}", Directory.GetCurrentDirectory());
             int result = InstanciateAndGenerateDb();
             stopwatch.Stop();
 
             var elapsed = stopwatch.Elapsed;
+            Log.Information("Execution finished in {Seconds:F2} seconds ({Minutes:F2} minutes)", elapsed.TotalSeconds, elapsed.TotalMinutes);
             Console.WriteLine($"Temps d'exécution : {elapsed.TotalSeconds:F2} secondes ({elapsed.TotalMinutes:F2} minutes).");
 
             return result;
         }
-        catch (FileNotFoundException)
+        catch (FileNotFoundException ex)
         {
             stopwatch.Stop();
+            Log.Fatal(ex, "Le fichier de configuration appsettings.json n'a pas été trouvé.");
             Console.WriteLine("Le fichier de configuration appsettings.json n'a pas été trouvé.");
             return -1;
+        }
+        catch (Exception ex)
+        {
+            stopwatch.Stop();
+            Log.Fatal(ex, "Unhandled exception during startup");
+            Console.WriteLine($"Erreur inattendue au démarrage: {ex.Message}");
+            return -2;
         }
         finally
         {
             Log.CloseAndFlush();
+            PauseIfInteractive(args);
         }
     }
 
@@ -41,7 +54,8 @@ internal class Program
         try
         {
             var dateFolder = $"{DateTime.Now:yyyyMMdd}";
-            var logDir = Path.Combine("logs", dateFolder);
+            var baseDir = AppContext.BaseDirectory;
+            var logDir = Path.Combine(baseDir, "logs", dateFolder);
             Directory.CreateDirectory(logDir);
             var logFile = Path.Combine(logDir, "gen_db.log");
 
@@ -50,6 +64,9 @@ internal class Program
                 .WriteTo.Console()
                 .WriteTo.File(logFile, rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null, shared: true)
                 .CreateLogger();
+
+            Log.Information("Logging configured: BaseDir={BaseDir}, File={LogFile}", baseDir, logFile);
+            Console.WriteLine($"Logs: {logFile}");
         }
         catch (Exception ex)
         {
@@ -60,21 +77,26 @@ internal class Program
     private static int InstanciateAndGenerateDb()
     {
         var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
+        Log.Information("Environment detected: {Environment}", env);
         IConfigurationRoot configuration = new ConfigurationBuilder()
                             .SetBasePath(Directory.GetCurrentDirectory())
                             .AddJsonFile("appsettings.json", optional: false)
                             .AddJsonFile($"appsettings.{env}.json", optional: true)
                             .Build();
+        Log.Information("Configuration loaded (appsettings.json, appsettings.{Env}.json)", env);
 
         var connectionString = configuration.GetConnectionString("ProductionDatabase");
         if (string.IsNullOrEmpty(connectionString))
         {
+            Log.Error("[MAIN] - Impossible de se connecter à la base de données: aucune chaîne de connexion.");
             Console.WriteLine("[MAIN] - Impossible de se connecter à la base de données.");
             return -1;
         }
         else
         {
+            Log.Information("Connection string retrieved. Starting generators...");
             LaunchGenerator(configuration, connectionString);
+            Log.Information("Generators finished successfully");
         }
         return 0;
     }
@@ -97,13 +119,17 @@ internal class Program
                 case "password": Environment.SetEnvironmentVariable("MYSQL_PASSWORD", val); Environment.SetEnvironmentVariable("MYSQL_ROOT_PASSWORD", val); break;
             }
         }
+        Log.Information("MySQL environment variables set from connection string");
     }
 
     private static AppDbContext CreateDbContext(string connectionString)
     {
+        Log.Information("Creating DbContext...");
         ApplyMySqlEnvFromConnectionString(connectionString);
         var factory = new DesignTimeDbContextFactory();
-        return factory.CreateDbContext(Array.Empty<string>());
+        var ctx = factory.CreateDbContext(Array.Empty<string>());
+        Log.Information("DbContext created");
+        return ctx;
     }
 
     private static void LaunchGenerator(IConfiguration configuration, string connectionString)
@@ -118,6 +144,7 @@ internal class Program
         IGenerator generatorTableOperations = new OperationGenerator(context, configuration);
         IGenerator generatorTableOrderLine = new OrderLineGenerator(context, configuration);
 
+        Log.Information("Starting ProcessGenerator...");
         ProcessGenerator(
             generatorTableArticle,
             generatorTableNomenclature,
@@ -126,6 +153,7 @@ internal class Program
             generatorTableVersionProduit,
             generatorTableOperations,
             generatorTableOrderLine);
+        Log.Information("ProcessGenerator completed");
     }
 
     private static void ProcessGenerator(
@@ -137,12 +165,19 @@ internal class Program
         IGenerator generatorTableOperations,
         IGenerator generatorTableOrderLine)
     {
+        Log.Information("Update Article...");
         generatorTableArticle.Update();
+        Log.Information("Update Nomenclature...");
         generatorTableNomenclature.Update();
+        Log.Information("Update Operateur...");
         generatorTableOperateur.Update();
+        Log.Information("Update OrdreFabrication...");
         generatorTableOrdreFabrication.Update();
+        Log.Information("Update VersionProduit...");
         generatorTableVersionProduit.Update();
+        Log.Information("Update OrderLine...");
         generatorTableOrderLine.Update();
+        Log.Information("Update Operations...");
         generatorTableOperations.Update();
     }
 
@@ -158,5 +193,14 @@ internal class Program
 
         Console.ResetColor();
         Console.WriteLine("\n");
+    }
+
+    private static void PauseIfInteractive(string[] args)
+    {
+        if (Environment.UserInteractive && (args == null || args.Length ==0 || !args.Contains("--no-wait")))
+        {
+            Console.WriteLine("Appuyez sur une touche pour fermer...");
+            try { Console.ReadKey(true); } catch { /* ignore */ }
+        }
     }
 }
