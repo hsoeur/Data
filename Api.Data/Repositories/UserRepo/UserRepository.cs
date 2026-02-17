@@ -45,16 +45,12 @@ namespace Api.Data.Repositories.UserRepo
 
             try
             {
-                // Sentinel exit dates representing active users
-                var validExitDates = new[]
-                {
-                    new DateTimeOffset(9999,12,31,0,0,0, TimeSpan.Zero),
-                    new DateTimeOffset(9999,1,1,0,0,0, TimeSpan.Zero)
-                };
+                // Active users: entry date in the past and exit date in the future (or equal to now)
+                var now = DateTimeOffset.UtcNow;
 
                 var operateurs = await _context.Users
                     .AsNoTracking()
-                    .Where(o => validExitDates.Contains(o.ExitDate) && o.Department == "PRO")
+                    .Where(o => o.EntryDate <= now && o.ExitDate >= now && o.Department == "PRO")
                     .ToListAsync();
 
                 stopwatch.Stop();

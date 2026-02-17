@@ -46,6 +46,16 @@ builder.Services.AddSwaggerGen(options =>
 });
 builder.Services.AddControllers();
 
+// CORS: allow all origins, headers, and methods (no credentials)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy => policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
+
 // Connection string from environment variables (same defaults as migrations)
 var server = Environment.GetEnvironmentVariable("MYSQL_HOST") ?? "localhost";
 var port = Environment.GetEnvironmentVariable("MYSQL_PORT") ?? "3306";
@@ -113,6 +123,9 @@ app.Lifetime.ApplicationStarted.Register(() =>
 });
 
 app.UseHttpsRedirection();
+
+// Enable CORS
+app.UseCors("AllowFrontend");
 
 app.MapControllers();
 
