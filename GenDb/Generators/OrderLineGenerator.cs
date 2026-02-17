@@ -78,7 +78,10 @@ namespace GenDb.Generators
                     continue;
                 }
                 int quantity = 0;
-                int.TryParse(row[2], out quantity);
+                if (!CsvParser.TryParseInt(row[2], out quantity))
+                {
+                    _logger.Warning("ParseFail {Entity} {Uid} Field={Field} Raw={Raw}", "OrderLine", uid, "Quantity", row[2]);
+                }
 
                 if (existing.TryGetValue(uid, out var ol))
                 {

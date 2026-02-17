@@ -78,12 +78,17 @@ internal class Program
     {
         var env = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
         Log.Information("Environment detected: {Environment}", env);
-        IConfigurationRoot configuration = new ConfigurationBuilder()
-                            .SetBasePath(Directory.GetCurrentDirectory())
-                            .AddJsonFile("appsettings.json", optional: false)
-                            .AddJsonFile($"appsettings.{env}.json", optional: true)
-                            .Build();
-        Log.Information("Configuration loaded (appsettings.json, appsettings.{Env}.json)", env);
+
+        // Always resolve configuration files from the executable directory to avoid issues when run by Task Scheduler
+        var baseDir = AppContext.BaseDirectory;
+        var builder = new ConfigurationBuilder()
+            .SetBasePath(baseDir)
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+            .AddJsonFile($"appsettings.{env}.json", optional: true, reloadOnChange: false)
+            .AddEnvironmentVariables();
+
+        IConfigurationRoot configuration = builder.Build();
+        Log.Information("Configuration loaded from BaseDir={BaseDir} (appsettings.json optional, env-specific optional)", baseDir);
 
         var connectionString = configuration.GetConnectionString("ProductionDatabase");
         if (string.IsNullOrEmpty(connectionString))
@@ -197,7 +202,8 @@ internal class Program
 
     private static void PauseIfInteractive(string[] args)
     {
-        if (Environment.UserInteractive && (args == null || args.Length ==0 || !args.Contains("--no-wait")))
+        // Close automatically by default. Only pause if --wait is explicitly provided.
+        if (Environment.UserInteractive && args != null && args.Contains("--wait"))
         {
             Console.WriteLine("Appuyez sur une touche pour fermer...");
             try { Console.ReadKey(true); } catch { /* ignore */ }

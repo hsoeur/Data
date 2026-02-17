@@ -19,7 +19,7 @@ namespace GenDb.Generators
             _context = context;
             _csvPath = configuration["CsvPaths:ManufacturingOrders"] ?? "C:\\Data\\Export_GPAO\\EXPORT_BDDPROD_OF.CSV";
 
-            var logDir = Path.Combine("logs", $"logsavecla{DateTime.Now:yyyyMMdd}");
+            var logDir = Path.Combine("logs", $"{DateTime.Now:yyyyMMdd}");
             Directory.CreateDirectory(logDir);
             var filePath = Path.Combine(logDir, "ManufacturingOrderGenerator.log");
             _logger = new LoggerConfiguration()
@@ -71,8 +71,8 @@ namespace GenDb.Generators
                     if (!int.TryParse(row[0], out var uid))
                     { skipped++; _logger.Warning("Skip {Entity} Reason={Reason} RawLine={RawLine}", "ManufacturingOrder", "Uid invalide", string.Join("|", row)); continue; }
                     var productUid = row[1];
-                    int.TryParse(row[2], out var quantity);
-                    int.TryParse(row[3], out var firstSerialNumber);
+                    if (!CsvParser.TryParseInt(row[2], out var quantity)) { _logger.Warning("ParseFail {Entity} {Uid} Field={Field} Raw={Raw}", "ManufacturingOrder", uid, "Quantity", row[2]); }
+                    if (!CsvParser.TryParseInt(row[3], out var firstSerialNumber)) { _logger.Warning("ParseFail {Entity} {Uid} Field={Field} Raw={Raw}", "ManufacturingOrder", uid, "FirstSerialNumber", row[3]); }
                     var internalOrder = row[4] ?? string.Empty;
                     var externalOrder = row[5] ?? string.Empty;
 
