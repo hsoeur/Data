@@ -19,13 +19,8 @@ namespace GenDb.Generators
             _context = context;
             _csvPath = configuration["CsvPaths:ManufacturingOrders"] ?? "C:\\Data\\Export_GPAO\\EXPORT_BDDPROD_OF.CSV";
 
-            var logDir = Path.Combine("logs", $"{DateTime.Now:yyyyMMdd}");
-            Directory.CreateDirectory(logDir);
-            var filePath = Path.Combine(logDir, "ManufacturingOrderGenerator.log");
-            _logger = new LoggerConfiguration()
-                .MinimumLevel.Information()
-                .WriteTo.File(filePath, retainedFileCountLimit: null, shared: true)
-                .CreateLogger();
+            // Use shared logger
+            _logger = Log.ForContext<ManufacturingOrderGenerator>();
         }
 
         public void Update()

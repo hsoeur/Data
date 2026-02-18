@@ -24,6 +24,7 @@ using Api.Data.Repositories.SolderingProgramRepo;
 using Api.Data.Repositories.SimCardRepo;
 using Api.Data.Repositories.OrderLineRepo;
 using Api.Data.Repositories.ArticleVersionRepo;
+using Api.Data.Repositories.DatabaseNotificationRepo;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -94,6 +95,7 @@ builder.Services.AddScoped<ILabelTemplateRepository, LabelTemplateRepository>();
 builder.Services.AddScoped<ISolderingProgramRepository, SolderingProgramRepository>();
 builder.Services.AddScoped<ISimCardRepository, SimCardRepository>();
 builder.Services.AddScoped<IOrderLineRepository, OrderLineRepository>();
+builder.Services.AddScoped<IDatabaseNotificationRepository, DatabaseNotificationRepository>();
 
 var app = builder.Build();
 

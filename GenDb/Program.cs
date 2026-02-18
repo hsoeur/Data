@@ -53,15 +53,20 @@ internal class Program
     {
         try
         {
-            var dateFolder = $"{DateTime.Now:yyyyMMdd}";
             var baseDir = AppContext.BaseDirectory;
-            var logDir = Path.Combine(baseDir, "logs", dateFolder);
+            var logDir = Path.Combine(baseDir, "logs");
             Directory.CreateDirectory(logDir);
-            var logFile = Path.Combine(logDir, "gen_db.log");
+            var logFile = Path.Combine(logDir, $"GEN_DB_HORIZON_LOGS_{DateTime.Now:yyyyMMdd}.log");
 
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Information()
-                .WriteTo.Console()
+                // Console sink excludes logs originating from generators
+                .WriteTo.Logger(lc => lc
+                .Filter.ByExcluding(e =>
+                e.Properties.TryGetValue("SourceContext", out var source) &&
+                source.ToString().StartsWith("\"GenDb.Generators"))
+                .WriteTo.Console())
+                // File sink captures everything including generators
                 .WriteTo.File(logFile, rollingInterval: RollingInterval.Infinite, retainedFileCountLimit: null, shared: true)
                 .CreateLogger();
 
