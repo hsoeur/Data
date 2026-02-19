@@ -25,6 +25,7 @@ using Api.Data.Repositories.SimCardRepo;
 using Api.Data.Repositories.OrderLineRepo;
 using Api.Data.Repositories.ArticleVersionRepo;
 using Api.Data.Repositories.DatabaseNotificationRepo;
+using Api.Data.Repositories.LabelRepo;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -96,6 +97,7 @@ builder.Services.AddScoped<ISolderingProgramRepository, SolderingProgramReposito
 builder.Services.AddScoped<ISimCardRepository, SimCardRepository>();
 builder.Services.AddScoped<IOrderLineRepository, OrderLineRepository>();
 builder.Services.AddScoped<IDatabaseNotificationRepository, DatabaseNotificationRepository>();
+builder.Services.AddScoped<ILabelRepository, LabelRepository>();
 
 var app = builder.Build();
 
@@ -124,10 +126,9 @@ app.Lifetime.ApplicationStarted.Register(() =>
     }
 });
 
-app.UseHttpsRedirection();
-
-// Enable CORS
 app.UseCors("AllowFrontend");
+
+app.UseHttpsRedirection();
 
 app.MapControllers();
 

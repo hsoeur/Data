@@ -62,8 +62,10 @@ namespace GenDb.Generators
                 if (row.Length <2)
                 { skipped++; _logger.Warning("Skip {Entity} Reason={Reason} RawLine={RawLine}", "FirmwareVersion", "Colonnes insuffisantes", string.Join("|", row)); continue; }
                 var articleUid = row[0]; var version = row[1];
-                if (string.IsNullOrWhiteSpace(articleUid) || string.IsNullOrWhiteSpace(version))
-                { skipped++; _logger.Warning("Skip {Entity} Reason={Reason} RawLine={RawLine}", "FirmwareVersion", "ArticleUid/Version manquants", string.Join("|", row)); continue; }
+                if (string.IsNullOrWhiteSpace(articleUid))
+                { skipped++; _logger.Warning("Skip {Entity} Reason={Reason} RawLine={RawLine}", "FirmwareVersion", "ArticleUid manquant", string.Join("|", row)); continue; }
+                // Normalize empty version to placeholder "Vx.xx"
+                version = string.IsNullOrWhiteSpace(version) ? "Vxx.xx" : version;
                 var key = (articleUid, version);
 
                 if (!existing.ContainsKey(key))
