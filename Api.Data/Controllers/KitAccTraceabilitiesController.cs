@@ -19,73 +19,7 @@ namespace Api.Data.Controllers
             _kitAccessoryRepository = kitAccessoryRepository;
         }
 
-        [SwaggerOperation(
-            Summary = "Crée un nouvel accessoire de kit",
-            Description = "Ce endpoint permet de créer un nouvel accessoire de kit en fournissant les informations nécessaires dans la requête.",
-            OperationId = "CreateKitAccessory"
-        )]
-        [HttpPost("create")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(KitAccTraceability))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<KitAccTraceability>> CreateKitAccessory([FromBody] KitAccTraceabilityDto request)
-        {
-            if (request == null)
-            {
-                return BadRequest(new ProblemDetails
-                {
-                    Title = "Paramètre invalide",
-                    Detail = "Le corps de la requête est requis."
-                });
-            }
-            if (string.IsNullOrWhiteSpace(request.OrderLineUid))
-            {
-                return BadRequest(new ProblemDetails
-                {
-                    Title = "Paramètre invalide",
-                    Detail = "Le paramètre 'OrderLineUid' est requis."
-                });
-            }
-            if (string.IsNullOrWhiteSpace(request.Product))
-            {
-                return BadRequest(new ProblemDetails
-                {
-                    Title = "Paramètre invalide",
-                    Detail = "Le paramètre 'Product' est requis."
-                });
-            }
-
-            try
-            {
-                Log.Information("CreateKitAccessory called with OrderLineUid: {OrderLineUid}, Product: {Product}, ClientOrder: {ClientOrder}, SerialNumber: {SerialNumber}",
-                    request.OrderLineUid, request.Product, request.ClientOrder, request.SerialNumber);
-
-                var kitAcc = new KitAccTraceability
-                {
-                    KitAccTraceabilityUid = Guid.NewGuid().ToString(),
-                    OrderLineUid = request.OrderLineUid,
-                    Product = request.Product,
-                    ClientOrder = request.ClientOrder,
-                    SerialNumber = request.SerialNumber,
-                    UserUid = request.UserUid,
-                    ScanFrame = request.ScanFrame,
-                    Date = DateTimeOffset.Now,
-                };
-
-                Log.Information("Creating KitAccessory with generated UID: {KitAccTraceabilityUid}", kitAcc.KitAccTraceabilityUid);
-
-                await _kitAccessoryRepository.CreateKitAccessory(kitAcc);
-
-                Log.Information("Successfully created KitAccessory with UID: {KitAccTraceabilityUid}", kitAcc.KitAccTraceabilityUid);
-
-                return Ok(kitAcc);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Exception occurred while processing CreateKitAccessory for OrderLineUid: {OrderLineUid}", request.OrderLineUid);
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-            }
-        }
+        ²
 
         [SwaggerOperation(
             Summary = "Récupère un accessoire de kit par ProductUid et OrderLineUid",

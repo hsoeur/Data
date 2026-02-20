@@ -26,6 +26,8 @@ using Api.Data.Repositories.OrderLineRepo;
 using Api.Data.Repositories.ArticleVersionRepo;
 using Api.Data.Repositories.DatabaseNotificationRepo;
 using Api.Data.Repositories.LabelRepo;
+using Api.Data.Repositories.KitTraceabilityRepo;
+using Api.Data.Repositories.KitAccTraceabilityRepo;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -98,6 +100,8 @@ builder.Services.AddScoped<ISimCardRepository, SimCardRepository>();
 builder.Services.AddScoped<IOrderLineRepository, OrderLineRepository>();
 builder.Services.AddScoped<IDatabaseNotificationRepository, DatabaseNotificationRepository>();
 builder.Services.AddScoped<ILabelRepository, LabelRepository>();
+builder.Services.AddScoped<IKitTraceabilityRepository, KitTraceabilityRepository>();
+builder.Services.AddScoped<IKitAccTraceabilityRepository, KitAccTraceabilityRepository>();
 
 var app = builder.Build();
 

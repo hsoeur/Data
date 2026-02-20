@@ -9,8 +9,7 @@ namespace Api.Data.Dtos
     [SwaggerSchema(Description = "DTO pour la traçabilité des accessoires de kit, utilisé pour les opérations API (création, consultation).")]
     public class KitAccTraceabilityDto
     {
-        [SwaggerSchema(Description = "Identifiant unique de l'accessoire de kit (généré côté serveur).")]
-        public string? KitAccTraceabilityUid { get; set; }
+
 
         [SwaggerSchema(Description = "Numéro de commande client associé à l’accessoire.")]
         public string ClientOrder { get; set; } = string.Empty;
@@ -26,9 +25,6 @@ namespace Api.Data.Dtos
 
         [SwaggerSchema(Description = "Numéro de scan (frame) utilisé lors du kitting.")]
         public string ScanFrame { get; set; } = string.Empty;
-
-        [SwaggerSchema(Description = "Date d’enregistrement de l’accessoire.")]
-        public DateTimeOffset Date { get; set; }
 
         [SwaggerSchema(Description = "Identifiant de l’utilisateur ayant réalisé le kitting.")]
         public string UserUid { get; set; } = string.Empty;
