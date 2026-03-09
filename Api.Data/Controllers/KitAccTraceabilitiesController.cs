@@ -19,7 +19,7 @@ namespace Api.Data.Controllers
             _kitAccessoryRepository = kitAccessoryRepository;
         }
 
-        ²
+        
 
         [SwaggerOperation(
             Summary = "Récupère un accessoire de kit par ProductUid et OrderLineUid",

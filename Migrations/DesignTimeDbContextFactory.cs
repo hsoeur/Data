@@ -20,18 +20,25 @@ namespace Migrations
             var user = Environment.GetEnvironmentVariable("MYSQL_USER") ?? "root";
             var password = Environment.GetEnvironmentVariable("MYSQL_PASSWORD") ?? Environment.GetEnvironmentVariable("MYSQL_ROOT_PASSWORD") ?? "root";
 
-            var connectionString = $"Server={server};Port={port};Database={databaseName};User={user};Password={password};TreatTinyAsBoolean=true;";
+            // Add connection and command timeout parameters to handle slow/unavailable connections
+            var connectionString = $"Server={server};Port={port};Database={databaseName};User={user};Password={password};TreatTinyAsBoolean=true;ConnectionTimeout=60;DefaultCommandTimeout=60;";
 
             var optionsBuilder = new DbContextOptionsBuilder<DataLib.AppDbContext>();
-            optionsBuilder.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
+     
+            // Use a static ServerVersion instead of AutoDetect to avoid initial connection
+            // This prevents timeout during DbContext creation
+    var serverVersion = new MySqlServerVersion(new Version(8, 0, 36));
+       
+            optionsBuilder.UseMySql(connectionString, serverVersion,
             mySqlOptions =>
             {
-                mySqlOptions.MigrationsAssembly("Migrations");
-                mySqlOptions.MigrationsHistoryTable("__efmigrationshistory", "dbo");
-                mySqlOptions.SchemaBehavior(MySqlSchemaBehavior.Ignore);
-            });
+      mySqlOptions.MigrationsAssembly("Migrations");
+         mySqlOptions.MigrationsHistoryTable("__efmigrationshistory", "dbo");
+      mySqlOptions.SchemaBehavior(MySqlSchemaBehavior.Ignore);
+    // EnableRetryOnFailure removed: incompatible with manual transactions (BeginTransaction) used in generators
+ });
 
-            return new DataLib.AppDbContext(optionsBuilder.Options);
+         return new DataLib.AppDbContext(optionsBuilder.Options);
         }
     }
 }

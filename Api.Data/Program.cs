@@ -66,20 +66,26 @@ var port = Environment.GetEnvironmentVariable("MYSQL_PORT") ?? "3306";
 var databaseName = Environment.GetEnvironmentVariable("MYSQL_DATABASE") ?? "db_production";
 var user = Environment.GetEnvironmentVariable("MYSQL_USER") ?? "root";
 var password = Environment.GetEnvironmentVariable("MYSQL_PASSWORD") ?? Environment.GetEnvironmentVariable("MYSQL_ROOT_PASSWORD") ?? "root";
-var connectionString = $"Server={server};Port={port};Database={databaseName};User={user};Password={password};TreatTinyAsBoolean=true;";
+
+// Add connection and command timeout parameters to handle slow/unavailable connections
+var connectionString = $"Server={server};Port={port};Database={databaseName};User={user};Password={password};TreatTinyAsBoolean=true;ConnectionTimeout=60;DefaultCommandTimeout=60;";
+
+// Use a static ServerVersion instead of AutoDetect to avoid initial connection timeout
+var serverVersion = new MySqlServerVersion(new Version(8, 0, 36));
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseMySql(
+options.UseMySql(
         connectionString,
-        ServerVersion.AutoDetect(connectionString),
-        mySqlOptions =>
+        serverVersion,
+      mySqlOptions =>
         {
             // Ensure EF Core uses the Migrations project for migrations
-            mySqlOptions.MigrationsAssembly("Migrations");
+   mySqlOptions.MigrationsAssembly("Migrations");
             // Align schema/history behavior with design-time factory
-            mySqlOptions.MigrationsHistoryTable("__efmigrationshistory", "dbo");
+      mySqlOptions.MigrationsHistoryTable("__efmigrationshistory", "dbo");
             mySqlOptions.SchemaBehavior(MySqlSchemaBehavior.Ignore);
-        }));
+            // EnableRetryOnFailure removed: can be added later if API doesn't use manual transactions
+  }));
 
 // Repositories
 builder.Services.AddScoped<IManufacturingOrderNotificationRepository, ManufacturingOrderNotificationRepository>();
