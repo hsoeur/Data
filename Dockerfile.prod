@@ -1,0 +1,36 @@
+# Étape 1 : Build de l'application avec le SDK .NET 9.0
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
+WORKDIR /src
+
+# Supprime les caches NuGet pour éviter les erreurs
+RUN dotnet nuget locals all --clear
+
+# Copie tous les fichiers .csproj et restauration des dépendances
+COPY ["Api.Data/Api.Data.csproj", "Api.Data/"]
+COPY ["DataLib/DataLib.csproj", "DataLib/"]
+COPY ["Migrations/Migrations.csproj", "Migrations/"]
+
+WORKDIR /src/Api.Data
+RUN dotnet restore --disable-parallel --ignore-failed-sources
+
+# Copie du reste des fichiers et compilation en mode Release
+WORKDIR /src
+COPY . .
+WORKDIR /src/Api.Data
+RUN dotnet publish -c Release -o /app/publish
+
+# Étape 2 : Exécution avec l'image .NET Runtime pour alléger l'image
+FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS runtime
+WORKDIR /app
+
+# ? Installer les outils pour le diagnostic
+RUN apt-get update && apt-get install -y curl iputils-ping net-tools procps
+
+# Copie uniquement les fichiers publiés du build
+COPY --from=build /app/publish .
+
+ENV ASPNETCORE_URLS=http://+:10000
+EXPOSE 10000
+
+# Lancement de l'application en mode production
+CMD ["dotnet", "Api.Data.dll"]
