@@ -8,10 +8,10 @@ pool:
 
 variables:
   BUILD_CONFIGURATION: 'Release'
-  IMAGE_NAME: 'DataProd_DataApi'
+  IMAGE_NAME: 'dataprod_api'
   SERVER_USER: 'adminprod'  
   SERVER_IP: '192.168.1.104'  
-  SERVER_PATH: 'C:\Deploy\containers\DataProd_DataApi'  
+  SERVER_PATH: 'C:\Deploy\containers\dataprod_api'  
   CONTAINER_NAME: 'dataprod_api'
   SSH_PASSWORD: 'Paris2024JO*'  # Variable secrète stockée dans Azure DevOps
   APP_PORT: '10000'  # Port d'écoute de l'API
