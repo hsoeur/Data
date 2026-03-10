@@ -13,8 +13,15 @@ variables:
   SERVER_IP: '192.168.1.104'  
   SERVER_PATH: 'C:\Deploy\containers\dataprod_api'  
   CONTAINER_NAME: 'dataprod_api'
-  SSH_PASSWORD: 'Paris2024JO*'  # Variable secrète stockée dans Azure DevOps
-  APP_PORT: '10000'  # Port d'écoute de l'API
+  SSH_PASSWORD: 'Paris2024JO*'  # ⚠️ À déplacer dans les variables secrètes Azure DevOps
+  APP_PORT: '10000'
+  
+  # Variables MySQL - À configurer dans Azure DevOps (Variables ou Variable Group)
+  MYSQL_HOST: 'localhost'
+  MYSQL_PORT: '3306'
+  MYSQL_DATABASE: 'db_production'
+  MYSQL_USER: 'root'
+  MYSQL_PASSWORD: 'root'
 
 stages:
 - stage: Build
@@ -32,12 +39,12 @@ stages:
     - script: |
         echo "🏗️ Construction de l'image Docker..."
         docker build --build-arg APP_PORT=$(APP_PORT) -t $(IMAGE_NAME):latest -f Dockerfile.prod .
-      displayName: "🐳 Build Docker"
+      displayName: "🐳 Build Docker Image"
 
     - script: |
         echo "📦 Sauvegarde de l'image Docker en fichier..."
         docker save $(IMAGE_NAME):latest -o $(IMAGE_NAME).tar
-      displayName: "📦 Sauvegarde en fichier"
+      displayName: "📦 Sauvegarde en fichier .tar"
 
     - task: PublishBuildArtifacts@1
       displayName: "📤 Upload de l'image dans Azure DevOps"
@@ -52,6 +59,7 @@ stages:
   - job: Deploy
     displayName: "📡 Déploiement SSH"
     steps:
+    
     - task: DownloadBuildArtifacts@0
       displayName: "📥 Télécharger l'image depuis Azure DevOps"
       inputs:
@@ -60,19 +68,22 @@ stages:
         downloadPath: '$(Pipeline.Workspace)'
 
     - script: |
-        echo "🔌 Connexion SSH et transfert de l'image..."
-        echo $(SSH_PASSWORD) | plink -batch -pw $(SSH_PASSWORD) $(SERVER_USER)@$(SERVER_IP) "mkdir -p $(SERVER_PATH)"
-        echo $(SSH_PASSWORD) | pscp -batch -pw $(SSH_PASSWORD) $(Pipeline.Workspace)/docker-image/$(IMAGE_NAME).tar $(SERVER_USER)@$(SERVER_IP):$(SERVER_PATH)/
+        echo "🔌 Création du répertoire de déploiement..."
+        echo $(SSH_PASSWORD) | plink -batch -pw $(SSH_PASSWORD) $(SERVER_USER)@$(SERVER_IP) "if not exist $(SERVER_PATH) mkdir $(SERVER_PATH)"
+      displayName: "📁 Créer le répertoire de déploiement"
 
+    - script: |
+        echo "📡 Transfert de l'image Docker vers le serveur..."
+        echo $(SSH_PASSWORD) | pscp -batch -pw $(SSH_PASSWORD) $(Pipeline.Workspace)/docker-image/$(IMAGE_NAME).tar $(SERVER_USER)@$(SERVER_IP):$(SERVER_PATH)/
       displayName: "📡 Transfert de l'image Docker"
 
     - script: |
-        echo "🛑 Arrêt du conteneur..."
+        echo "🛑 Arrêt du conteneur existant..."
         echo $(SSH_PASSWORD) | plink -batch -pw $(SSH_PASSWORD) $(SERVER_USER)@$(SERVER_IP) "docker stop $(CONTAINER_NAME) || exit 0"
       displayName: "🛑 Arrêter le conteneur en cours"
 
     - script: |
-        echo "🗑️ Suppression du conteneur..."
+        echo "🗑️ Suppression du conteneur existant..."
         echo $(SSH_PASSWORD) | plink -batch -pw $(SSH_PASSWORD) $(SERVER_USER)@$(SERVER_IP) "docker rm $(CONTAINER_NAME) || exit 0"
       displayName: "🗑️ Supprimer le conteneur existant"
 
@@ -87,6 +98,16 @@ stages:
       displayName: "📦 Charger la nouvelle image Docker"
 
     - script: |
-        echo "🚀 Déploiement du nouveau conteneur..."
-        echo $(SSH_PASSWORD) | plink -batch -pw $(SSH_PASSWORD) $(SERVER_USER)@$(SERVER_IP) "docker run -d --name $(CONTAINER_NAME) --restart unless-stopped -p $(APP_PORT):$(APP_PORT) -v C:\Logs\Containers\$(CONTAINER_NAME):/app/logs $(IMAGE_NAME):latest"
-      displayName: "🚀 Démarrer le nouveau conteneur avec montage de volume"
+        echo "🚀 Déploiement du nouveau conteneur avec configuration MySQL..."
+        echo $(SSH_PASSWORD) | plink -batch -pw $(SSH_PASSWORD) $(SERVER_USER)@$(SERVER_IP) "docker run -d --name $(CONTAINER_NAME) --restart unless-stopped -p $(APP_PORT):$(APP_PORT) -e MYSQL_HOST=$(MYSQL_HOST) -e MYSQL_PORT=$(MYSQL_PORT) -e MYSQL_DATABASE=$(MYSQL_DATABASE) -e MYSQL_USER=$(MYSQL_USER) -e MYSQL_PASSWORD=$(MYSQL_PASSWORD) -v C:\Logs\Containers\$(CONTAINER_NAME):/app/Logs $(IMAGE_NAME):latest"
+      displayName: "🚀 Démarrer le nouveau conteneur avec configuration MySQL"
+
+    - script: |
+        echo "✅ Vérification de l'état du conteneur..."
+        echo $(SSH_PASSWORD) | plink -batch -pw $(SSH_PASSWORD) $(SERVER_USER)@$(SERVER_IP) "docker ps -a --filter name=$(CONTAINER_NAME)"
+      displayName: "✅ Vérifier l'état du conteneur"
+
+    - script: |
+        echo "📋 Affichage des logs du conteneur (30 dernières lignes)..."
+        echo $(SSH_PASSWORD) | plink -batch -pw $(SSH_PASSWORD) $(SERVER_USER)@$(SERVER_IP) "docker logs --tail 30 $(CONTAINER_NAME)"
+      displayName: "📋 Afficher les logs du conteneur"
