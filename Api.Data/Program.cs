@@ -84,7 +84,7 @@ options.AddPolicy("AllowFrontend",
 });
 
 // Connection string from environment variables (same defaults as migrations)
-var server = "mysql-prod";
+var server = "localhost";
 var port = "3306";
 var databaseName = "db_production";
 var user = "root";
