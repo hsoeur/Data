@@ -27,6 +27,9 @@ namespace DataLib
         [SwaggerSchema(Description = "Code interne du composant Horizon utilisé.")]
         public string HorizonComponentCode { get; set; } = string.Empty;
 
+        [SwaggerSchema(Description = "Numéro de série.")]
+        public int SerialNumber { get; set; }
+
         [SwaggerSchema(Description = "Numéro de scan (frame) utilisé pour l’identification du kit.")]
         public string ScanFrame { get; set; } = string.Empty;
 

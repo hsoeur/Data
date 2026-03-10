@@ -63,6 +63,7 @@ namespace Api.Data.Controllers
                 ClientOrder = request.ClientOrder,
                 ManufacturingOrderUid = request.ManufacturingOrderUid,
                 Product = request.Product,
+                SerialNumber = request.SerialNumber,
                 ScanFrame = request.ScanFrame,
                 HorizonComponentCode = request.HorizonComponentCode,
                 Date = request.Date,

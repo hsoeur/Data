@@ -271,6 +271,9 @@ namespace Migrations.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<int>("SerialNumber")
+                        .HasColumnType("int");
+
                     b.Property<string>("UserUid")
                         .IsRequired()
                         .HasColumnType("longtext");
