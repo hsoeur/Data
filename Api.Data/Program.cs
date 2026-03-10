@@ -28,8 +28,31 @@ using Api.Data.Repositories.DatabaseNotificationRepo;
 using Api.Data.Repositories.LabelRepo;
 using Api.Data.Repositories.KitTraceabilityRepo;
 using Api.Data.Repositories.KitAccTraceabilityRepo;
+using Serilog;
+
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft.AspNetCore", Serilog.Events.LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", Serilog.Events.LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+  .Enrich.WithProperty("Application", "Api.Data")
+    .WriteTo.Console()
+    .WriteTo.File(
+        path: "Logs/api-data-.log",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 30, // Keep 30 days of logs
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+    .CreateLogger();
+
+try
+{
+    Log.Information("Starting Api.Data application");
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Use Serilog for logging
+builder.Host.UseSerilog();
 
 // Services
 builder.Services.AddOpenApi();
@@ -40,8 +63,8 @@ builder.Services.AddSwaggerGen(options =>
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "Api.Data",
-        Version = "v1",
-        Description = "Uniformisation et centralisation des appels aux données de production."
+     Version = "v1",
+    Description = "Uniformisation et centralisation des appels aux données de production."
     });
     // Active les annotations (SwaggerOperation, SwaggerSchema, etc.)
     options.EnableAnnotations();
@@ -53,11 +76,11 @@ builder.Services.AddControllers();
 // CORS: allow all origins, headers, and methods (no credentials)
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend",
-        policy => policy
+options.AddPolicy("AllowFrontend",
+      policy => policy
             .AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod());
+  .AllowAnyHeader()
+       .AllowAnyMethod());
 });
 
 // Connection string from environment variables (same defaults as migrations)
@@ -70,21 +93,28 @@ var password = Environment.GetEnvironmentVariable("MYSQL_PASSWORD") ?? Environme
 // Add connection and command timeout parameters to handle slow/unavailable connections
 var connectionString = $"Server={server};Port={port};Database={databaseName};User={user};Password={password};TreatTinyAsBoolean=true;ConnectionTimeout=60;DefaultCommandTimeout=60;";
 
+Log.Information("Connecting to MySQL database at {Server}:{Port}/{Database}", server, port, databaseName);
+
 // Use a static ServerVersion instead of AutoDetect to avoid initial connection timeout
 var serverVersion = new MySqlServerVersion(new Version(8, 0, 36));
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 options.UseMySql(
-        connectionString,
-        serverVersion,
+    connectionString,
+   serverVersion,
       mySqlOptions =>
         {
-            // Ensure EF Core uses the Migrations project for migrations
+ // Ensure EF Core uses the Migrations project for migrations
    mySqlOptions.MigrationsAssembly("Migrations");
-            // Align schema/history behavior with design-time factory
+     // Align schema/history behavior with design-time factory
       mySqlOptions.MigrationsHistoryTable("__efmigrationshistory", "dbo");
             mySqlOptions.SchemaBehavior(MySqlSchemaBehavior.Ignore);
-            // EnableRetryOnFailure removed: can be added later if API doesn't use manual transactions
+ // Enable retry on transient failures in production
+      mySqlOptions.EnableRetryOnFailure(
+        maxRetryCount: 5,
+    maxRetryDelay: TimeSpan.FromSeconds(30),
+            errorNumbersToAdd: null
+            );
   }));
 
 // Repositories
@@ -127,12 +157,13 @@ app.Lifetime.ApplicationStarted.Register(() =>
         var server = app.Services.GetRequiredService<IServer>();
         var addresses = server.Features.Get<IServerAddressesFeature>()?.Addresses;
         var url = addresses?.FirstOrDefault() ?? "http://localhost:5000";
-        var target = $"{url.TrimEnd('/')}/"; // Swagger UI is served at root
+     var target = $"{url.TrimEnd('/')}/"; // Swagger UI is served at root
+        Log.Information("Opening browser to Swagger UI at {Url}", target);
         Process.Start(new ProcessStartInfo { FileName = target, UseShellExecute = true });
     }
-    catch
+    catch (Exception ex)
     {
-        // ignore failures (e.g., headless environments)
+        Log.Warning(ex, "Failed to open browser automatically");
     }
 });
 
@@ -142,4 +173,14 @@ app.UseHttpsRedirection();
 
 app.MapControllers();
 
+    Log.Information("Api.Data application started successfully");
 app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Api.Data application terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
