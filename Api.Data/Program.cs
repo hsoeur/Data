@@ -84,11 +84,11 @@ options.AddPolicy("AllowFrontend",
 });
 
 // Connection string from environment variables (same defaults as migrations)
-var server = Environment.GetEnvironmentVariable("MYSQL_HOST") ?? "mysql-prod";
-var port = Environment.GetEnvironmentVariable("MYSQL_PORT") ?? "3306";
-var databaseName = Environment.GetEnvironmentVariable("MYSQL_DATABASE") ?? "db_production";
-var user = Environment.GetEnvironmentVariable("MYSQL_USER") ?? "root";
-var password = Environment.GetEnvironmentVariable("MYSQL_PASSWORD") ?? Environment.GetEnvironmentVariable("MYSQL_ROOT_PASSWORD") ?? "root";
+var server = "mysql-prod";
+var port = "3306";
+var databaseName = "db_production";
+var user = "root";
+var password = "root";
 
 // Add connection and command timeout parameters to handle slow/unavailable connections
 var connectionString = $"Server={server};Port={port};Database={databaseName};User={user};Password={password};TreatTinyAsBoolean=true;ConnectionTimeout=60;DefaultCommandTimeout=60;";
