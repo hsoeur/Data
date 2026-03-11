@@ -46,6 +46,30 @@ namespace Api.Data.Controllers
         }
 
         /// <summary>
+        /// Affiche la configuration de connexion MySQL (sans mot de passe).
+        /// </summary>
+        [HttpGet]
+        public IActionResult Config()
+        {
+            var server = Environment.GetEnvironmentVariable("MYSQL_HOST") ?? "localhost (default)";
+            var port = Environment.GetEnvironmentVariable("MYSQL_PORT") ?? "3306 (default)";
+            var database = Environment.GetEnvironmentVariable("MYSQL_DATABASE") ?? "db_production (default)";
+            var user = Environment.GetEnvironmentVariable("MYSQL_USER") ?? "root (default)";
+            var hasPassword = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MYSQL_PASSWORD")) || 
+            !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MYSQL_ROOT_PASSWORD"));
+
+            return Ok(new 
+            { 
+                mysql_host = server,
+                mysql_port = port,
+                mysql_database = database,
+                mysql_user = user,
+                mysql_password_set = hasPassword,
+                environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Unknown"
+            });
+        }
+
+        /// <summary>
         /// Endpoint conservé pour compatibilité.
         /// </summary>
         [HttpGet]
