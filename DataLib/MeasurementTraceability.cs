@@ -45,5 +45,10 @@ namespace DataLib
         [ForeignKey(nameof(Machine))]
         public string MachineUid { get; set; } = string.Empty;
         public Machine? Machine { get; set; }
+
+        [SwaggerSchema(Description = "Identifiant de l’ordre de fabrication associé à cette mesure.")]
+        [ForeignKey(nameof(ManufacturingOrder))]
+        public int? ManufacturingOrderUid { get; set; }
+        public ManufacturingOrder? ManufacturingOrder { get; set; }
     }
 }

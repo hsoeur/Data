@@ -12,5 +12,6 @@
         public string UnitUid { get; set; } = string.Empty;
         public string UserUid { get; set; } = string.Empty;
         public string MachineUid { get; set; } = string.Empty;
+        public int? ManufacturingOrderUid { get; set; }
     }
 }

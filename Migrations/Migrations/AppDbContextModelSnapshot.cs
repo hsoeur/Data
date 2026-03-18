@@ -493,6 +493,9 @@ namespace Migrations.Migrations
                         .IsRequired()
                         .HasColumnType("varchar(255)");
 
+                    b.Property<int?>("ManufacturingOrderUid")
+                        .HasColumnType("int");
+
                     b.Property<int>("OperationNumber")
                         .HasColumnType("int");
 
@@ -518,6 +521,8 @@ namespace Migrations.Migrations
                     b.HasKey("MeasurementTraceabilityUid");
 
                     b.HasIndex("MachineUid");
+
+                    b.HasIndex("ManufacturingOrderUid");
 
                     b.HasIndex("ProductUid");
 
@@ -914,6 +919,10 @@ namespace Migrations.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("DataLib.ManufacturingOrder", "ManufacturingOrder")
+                        .WithMany()
+                        .HasForeignKey("ManufacturingOrderUid");
+
                     b.HasOne("DataLib.Article", "Article")
                         .WithMany()
                         .HasForeignKey("ProductUid")
@@ -929,6 +938,8 @@ namespace Migrations.Migrations
                     b.Navigation("Article");
 
                     b.Navigation("Machine");
+
+                    b.Navigation("ManufacturingOrder");
 
                     b.Navigation("User");
                 });
