@@ -81,6 +81,68 @@ namespace Api.Data.Repositories.MacAddressRepo
             }
         }
 
+        public async Task<MacAddress?> GetByMacAddressValueAsync(string macAddressValue)
+        {
+            Log.Information("MacAddressRepository:GetByMacAddressValueAsync - start MacAddressValue: {MacAddressValue}", macAddressValue);
+            try
+            {
+                var entity = await _context.MacAddresses
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(m => m.MacAddressValue == macAddressValue);
+
+                Log.Information("MacAddressRepository:GetByMacAddressValueAsync - {Result}", entity == null ? "not found" : "found");
+                return entity;
+            }
+            catch (DbUpdateException dbEx)
+            {
+                Log.Error(dbEx, "MacAddressRepository:GetByMacAddressValueAsync - database update exception for MacAddressValue {MacAddressValue}", macAddressValue);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "MacAddressRepository:GetByMacAddressValueAsync - unexpected error for MacAddressValue {MacAddressValue}", macAddressValue);
+                throw;
+            }
+        }
+
+        public async Task<MacAddress?> MarkMacAddressAsUsedAsync(string macAddressValue)
+        {
+            Log.Information("MacAddressRepository:MarkMacAddressAsUsedAsync - start MacAddressValue: {MacAddressValue}", macAddressValue);
+            try
+            {
+                var entity = await _context.MacAddresses
+                    .FirstOrDefaultAsync(m => m.MacAddressValue == macAddressValue);
+
+                if (entity == null)
+                {
+                    Log.Information("MacAddressRepository:MarkMacAddressAsUsedAsync - MacAddressValue {MacAddressValue} not found", macAddressValue);
+                    return null;
+                }
+
+                entity.Status = MacAddressStatus.USED;
+                entity.UsedAt = DateTime.UtcNow;
+
+                await _context.SaveChangesAsync();
+                Log.Information("MacAddressRepository:MarkMacAddressAsUsedAsync - marked as USED id: {Id}", entity.Id);
+                return entity;
+            }
+            catch (DbUpdateConcurrencyException concEx)
+            {
+                Log.Error(concEx, "MacAddressRepository:MarkMacAddressAsUsedAsync - concurrency error for MacAddressValue {MacAddressValue}", macAddressValue);
+                throw;
+            }
+            catch (DbUpdateException dbEx)
+            {
+                Log.Error(dbEx, "MacAddressRepository:MarkMacAddressAsUsedAsync - database update exception for MacAddressValue {MacAddressValue}", macAddressValue);
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "MacAddressRepository:MarkMacAddressAsUsedAsync - unexpected error for MacAddressValue {MacAddressValue}", macAddressValue);
+                throw;
+            }
+        }
+
         public async Task<MacAddress> CreateAsync(MacAddress macAddress)
         {
             Log.Information("MacAddressRepository:CreateAsync - start MacAddressValue: {MacAddressValue}", macAddress?.MacAddressValue);

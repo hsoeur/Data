@@ -28,6 +28,8 @@ using Api.Data.Repositories.DatabaseNotificationRepo;
 using Api.Data.Repositories.LabelRepo;
 using Api.Data.Repositories.KitTraceabilityRepo;
 using Api.Data.Repositories.KitAccTraceabilityRepo;
+using Api.Data.Repositories.MeasurementTraceabilityRepo;
+using Api.Data.Repositories.MacAddressRepo;
 using Serilog;
 
 // Configure Serilog
@@ -84,7 +86,7 @@ options.AddPolicy("AllowFrontend",
 });
 
 // Connection string from environment variables (same defaults as migrations)
-var server = Environment.GetEnvironmentVariable("MYSQL_HOST") ?? "mysql";
+var server = Environment.GetEnvironmentVariable("MYSQL_HOST") ?? "localhost";
 var port = Environment.GetEnvironmentVariable("MYSQL_PORT") ?? "3306";
 var databaseName = Environment.GetEnvironmentVariable("MYSQL_DATABASE") ?? "db_production";
 var user = Environment.GetEnvironmentVariable("MYSQL_USER") ?? "user";
@@ -138,6 +140,8 @@ builder.Services.AddScoped<IDatabaseNotificationRepository, DatabaseNotification
 builder.Services.AddScoped<ILabelRepository, LabelRepository>();
 builder.Services.AddScoped<IKitTraceabilityRepository, KitTraceabilityRepository>();
 builder.Services.AddScoped<IKitAccTraceabilityRepository, KitAccTraceabilityRepository>();
+builder.Services.AddScoped<IMeasurementTraceabilityRepository, MeasurementTraceabilityRepository>();
+builder.Services.AddScoped<IMacAddressRepository, MacAddressRepository>();
 
 var app = builder.Build();
 
