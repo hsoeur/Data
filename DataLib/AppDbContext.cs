@@ -36,6 +36,7 @@ namespace DataLib
         public DbSet<DatabaseNotification> DatabaseNotifications { get; set; }
         public DbSet<KitTraceability> KitTraceabilities { get; set; }
         public DbSet<KitAccTraceability> KitAccTraceabilities { get; set; }
+        public DbSet<MacAddress> MacAddresses { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

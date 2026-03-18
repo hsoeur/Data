@@ -384,6 +384,37 @@ namespace Migrations.Migrations
                     b.ToTable("LabelTypes");
                 });
 
+            modelBuilder.Entity("DataLib.MacAddress", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("MacAddressValue")
+                        .IsRequired()
+                        .HasMaxLength(17)
+                        .HasColumnType("char(17)");
+
+                    b.Property<DateTime?>("ReservedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("enum('AVAILABLE','RESERVED','USED')");
+
+                    b.Property<DateTime?>("UsedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MacAddresses");
+                });
+
             modelBuilder.Entity("DataLib.Machine", b =>
                 {
                     b.Property<string>("MachineUid")
