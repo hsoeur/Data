@@ -28,7 +28,9 @@ using Api.Data.Repositories.DatabaseNotificationRepo;
 using Api.Data.Repositories.LabelRepo;
 using Api.Data.Repositories.KitTraceabilityRepo;
 using Api.Data.Repositories.KitAccTraceabilityRepo;
+using Api.Data.Repositories.MacAddressRepo;
 using Serilog;
+using Api.Data.Repositories.MeasurementTraceabilityRepo;
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
@@ -84,11 +86,11 @@ options.AddPolicy("AllowFrontend",
 });
 
 // Connection string from environment variables (same defaults as migrations)
-var server = Environment.GetEnvironmentVariable("MYSQL_HOST") ?? "mysql";
+var server = Environment.GetEnvironmentVariable("MYSQL_HOST") ?? "localhost";
 var port = Environment.GetEnvironmentVariable("MYSQL_PORT") ?? "3306";
 var databaseName = Environment.GetEnvironmentVariable("MYSQL_DATABASE") ?? "db_production";
-var user = Environment.GetEnvironmentVariable("MYSQL_USER") ?? "user";
-var password = Environment.GetEnvironmentVariable("MYSQL_PASSWORD") ?? Environment.GetEnvironmentVariable("MYSQL_ROOT_PASSWORD") ?? "user";
+var user = Environment.GetEnvironmentVariable("MYSQL_USER") ?? "root";
+var password = Environment.GetEnvironmentVariable("MYSQL_PASSWORD") ?? Environment.GetEnvironmentVariable("MYSQL_ROOT_PASSWORD") ?? "root";
 
 // Add connection and command timeout parameters to handle slow/unavailable connections
 var connectionString = $"Server={server};Port={port};Database={databaseName};User={user};Password={password};TreatTinyAsBoolean=true;ConnectionTimeout=60;DefaultCommandTimeout=60;";
@@ -138,6 +140,8 @@ builder.Services.AddScoped<IDatabaseNotificationRepository, DatabaseNotification
 builder.Services.AddScoped<ILabelRepository, LabelRepository>();
 builder.Services.AddScoped<IKitTraceabilityRepository, KitTraceabilityRepository>();
 builder.Services.AddScoped<IKitAccTraceabilityRepository, KitAccTraceabilityRepository>();
+builder.Services.AddScoped<IMacAddressRepository, MacAddressRepository>();
+builder.Services.AddScoped<IMeasurementTraceabilityRepository, MeasurementTraceabilityRepository>();
 
 var app = builder.Build();
 

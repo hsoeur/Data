@@ -1,12 +1,16 @@
 ﻿START TRANSACTION;
-ALTER TABLE `MeasurementTraceabilities` ADD `ManufacturingOrderUid` int NULL;
-
-CREATE INDEX `IX_MeasurementTraceabilities_ManufacturingOrderUid` ON `MeasurementTraceabilities` (`ManufacturingOrderUid`);
-
-ALTER TABLE `MeasurementTraceabilities` ADD CONSTRAINT `FK_MeasurementTraceabilities_ManufacturingOrders_ManufacturingO~` FOREIGN KEY (`ManufacturingOrderUid`) REFERENCES `ManufacturingOrders` (`ManufacturingOrderUid`);
+CREATE TABLE `MacAddresses` (
+    `Id` int NOT NULL AUTO_INCREMENT,
+    `MacAddressValue` char(17) CHARACTER SET utf8mb4 NOT NULL,
+    `Status` enum('AVAILABLE','RESERVED','USED') CHARACTER SET utf8mb4 NOT NULL,
+    `ReservedAt` datetime(6) NULL,
+    `UsedAt` datetime(6) NULL,
+    `CreatedAt` datetime(6) NOT NULL,
+    CONSTRAINT `PK_MacAddresses` PRIMARY KEY (`Id`)
+) CHARACTER SET=utf8mb4;
 
 INSERT INTO `__efmigrationshistory` (`MigrationId`, `ProductVersion`)
-VALUES ('20260318100723_ManufacturingOrderMeasTracea', '9.0.0');
+VALUES ('20260318103900_MacAddresses', '9.0.0');
 
 COMMIT;
 
