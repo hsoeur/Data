@@ -19,7 +19,7 @@ namespace Api.Data.Controllers
             _repository = repository;
         }
 
-        [SwaggerOperation(Summary = "Récupère la prochaine adresse MAC disponible", OperationId = "GetNextMac")]
+        [SwaggerOperation(Summary = "Rï¿½cupï¿½re la prochaine adresse MAC disponible", OperationId = "GetNextMac")]
         [HttpGet("next-mac")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(NextMacAddressDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -29,7 +29,7 @@ namespace Api.Data.Controllers
             try
             {
                 Log.Information("GetNextMac called");
-                var macAddress = await _repository.GetNextAvailableMacAddressAsync();
+                var macAddress = await _repository.ReserveNextMacAddressAsync();
 
                 if (macAddress == null)
                 {
@@ -37,7 +37,7 @@ namespace Api.Data.Controllers
                     return NotFound(new ProblemDetails
                     {
                         Title = "Aucune adresse MAC disponible",
-                        Detail = "Aucune adresse MAC avec le statut 'AVAILABLE' n'a été trouvée."
+                        Detail = "Aucune adresse MAC avec le statut 'AVAILABLE' n'a ï¿½tï¿½ trouvï¿½e."
                     });
                 }
 
@@ -54,11 +54,11 @@ namespace Api.Data.Controllers
             catch (System.Exception ex)
             {
                 Log.Error(ex, "GetNextMac failed");
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Erreur lors de la récupération de la prochaine adresse MAC: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Erreur lors de la rï¿½cupï¿½ration de la prochaine adresse MAC: {ex.Message}");
             }
         }
 
-        [SwaggerOperation(Summary = "Récupère toutes les adresses MAC", OperationId = "GetAllMacAddresses")]
+        [SwaggerOperation(Summary = "Rï¿½cupï¿½re toutes les adresses MAC", OperationId = "GetAllMacAddresses")]
         [HttpGet("all")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ICollection<MacAddress>))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -79,11 +79,11 @@ namespace Api.Data.Controllers
             catch (System.Exception ex)
             {
                 Log.Error(ex, "GetAllMacAddresses failed");
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Erreur lors de la récupération des adresses MAC: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Erreur lors de la rï¿½cupï¿½ration des adresses MAC: {ex.Message}");
             }
         }
 
-        [SwaggerOperation(Summary = "Récupère une adresse MAC par ID", OperationId = "GetMacAddressById")]
+        [SwaggerOperation(Summary = "Rï¿½cupï¿½re une adresse MAC par ID", OperationId = "GetMacAddressById")]
         [HttpGet("by-id")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MacAddress))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -93,7 +93,7 @@ namespace Api.Data.Controllers
         {
             if (id <= 0)
             {
-                return BadRequest(new ProblemDetails { Title = "Paramètre invalide", Detail = "Le paramètre 'id' doit être supérieur à 0." });
+                return BadRequest(new ProblemDetails { Title = "Paramï¿½tre invalide", Detail = "Le paramï¿½tre 'id' doit ï¿½tre supï¿½rieur ï¿½ 0." });
             }
 
             try
@@ -110,11 +110,11 @@ namespace Api.Data.Controllers
             catch (System.Exception ex)
             {
                 Log.Error(ex, "GetMacAddressById failed for ID {Id}", id);
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Erreur lors de la récupération de l'adresse MAC {id}: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Erreur lors de la rï¿½cupï¿½ration de l'adresse MAC {id}: {ex.Message}");
             }
         }
 
-        [SwaggerOperation(Summary = "Crée une adresse MAC", OperationId = "CreateMacAddress")]
+        [SwaggerOperation(Summary = "Crï¿½e une adresse MAC", OperationId = "CreateMacAddress")]
         [HttpPost("create")]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(MacAddress))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -123,7 +123,7 @@ namespace Api.Data.Controllers
         {
             if (macAddress == null)
             {
-                return BadRequest(new ProblemDetails { Title = "Paramètre invalide", Detail = "Le corps de la requête est requis." });
+                return BadRequest(new ProblemDetails { Title = "Paramï¿½tre invalide", Detail = "Le corps de la requï¿½te est requis." });
             }
             if (!ModelState.IsValid)
             {
@@ -139,11 +139,11 @@ namespace Api.Data.Controllers
             catch (System.Exception ex)
             {
                 Log.Error(ex, "CreateMacAddress failed for MacAddress {MacAddress}", macAddress?.MacAddressValue);
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Erreur lors de la création de l'adresse MAC: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Erreur lors de la crï¿½ation de l'adresse MAC: {ex.Message}");
             }
         }
 
-        [SwaggerOperation(Summary = "Met à jour une adresse MAC", OperationId = "UpdateMacAddress")]
+        [SwaggerOperation(Summary = "Met ï¿½ jour une adresse MAC", OperationId = "UpdateMacAddress")]
         [HttpPut("update")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -153,7 +153,7 @@ namespace Api.Data.Controllers
         {
             if (macAddress == null)
             {
-                return BadRequest(new ProblemDetails { Title = "Paramètre invalide", Detail = "Le corps de la requête est requis." });
+                return BadRequest(new ProblemDetails { Title = "Paramï¿½tre invalide", Detail = "Le corps de la requï¿½te est requis." });
             }
             if (!ModelState.IsValid)
             {
@@ -174,7 +174,7 @@ namespace Api.Data.Controllers
             catch (System.Exception ex)
             {
                 Log.Error(ex, "UpdateMacAddress failed for ID {Id}", macAddress?.Id);
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Erreur lors de la mise à jour de l'adresse MAC: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Erreur lors de la mise ï¿½ jour de l'adresse MAC: {ex.Message}");
             }
         }
 
@@ -188,7 +188,7 @@ namespace Api.Data.Controllers
         {
             if (id <= 0)
             {
-                return BadRequest(new ProblemDetails { Title = "Paramètre invalide", Detail = "Le paramètre 'id' doit être supérieur à 0." });
+                return BadRequest(new ProblemDetails { Title = "Paramï¿½tre invalide", Detail = "Le paramï¿½tre 'id' doit ï¿½tre supï¿½rieur ï¿½ 0." });
             }
 
             try

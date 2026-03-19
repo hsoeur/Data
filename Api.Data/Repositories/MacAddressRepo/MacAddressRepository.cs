@@ -7,6 +7,8 @@ namespace Api.Data.Repositories.MacAddressRepo
     public class MacAddressRepository : IMacAddressRepository
     {
         private readonly AppDbContext _context;
+        private static readonly SemaphoreSlim _reservationLock = new SemaphoreSlim(1, 1);
+        private static readonly TimeSpan _reservationTimeout = TimeSpan.FromMinutes(10);
 
         public MacAddressRepository(AppDbContext context)
         {
@@ -78,6 +80,51 @@ namespace Api.Data.Repositories.MacAddressRepo
             {
                 Log.Error(ex, "MacAddressRepository:GetNextAvailableMacAddressAsync - unexpected error");
                 throw;
+            }
+        }
+
+        public async Task<MacAddress?> ReserveNextMacAddressAsync()
+        {
+            Log.Information("MacAddressRepository:ReserveNextMacAddressAsync - waiting for lock");
+            await _reservationLock.WaitAsync();
+            try
+            {
+                Log.Information("MacAddressRepository:ReserveNextMacAddressAsync - lock acquired");
+                var staleThreshold = DateTime.UtcNow - _reservationTimeout;
+
+                var entity = await _context.MacAddresses
+                    .Where(m => m.Status == MacAddressStatus.AVAILABLE
+                             || (m.Status == MacAddressStatus.RESERVED && m.ReservedAt < staleThreshold))
+                    .OrderBy(m => m.Id)
+                    .FirstOrDefaultAsync();
+
+                if (entity == null)
+                {
+                    Log.Warning("MacAddressRepository:ReserveNextMacAddressAsync - no MAC available");
+                    return null;
+                }
+
+                entity.Status = MacAddressStatus.RESERVED;
+                entity.ReservedAt = DateTime.UtcNow;
+                await _context.SaveChangesAsync();
+
+                Log.Information("MacAddressRepository:ReserveNextMacAddressAsync - reserved Id={Id} Address={MacAddressValue}", entity.Id, entity.MacAddressValue);
+                return entity;
+            }
+            catch (DbUpdateException dbEx)
+            {
+                Log.Error(dbEx, "MacAddressRepository:ReserveNextMacAddressAsync - database update exception");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "MacAddressRepository:ReserveNextMacAddressAsync - unexpected error");
+                throw;
+            }
+            finally
+            {
+                _reservationLock.Release();
+                Log.Information("MacAddressRepository:ReserveNextMacAddressAsync - lock released");
             }
         }
 

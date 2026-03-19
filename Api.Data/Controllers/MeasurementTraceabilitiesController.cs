@@ -29,8 +29,8 @@ namespace Api.Data.Controllers
         }
 
         [SwaggerOperation(
-            Summary = "Crée une nouvelle traçabilité de mesure",
-            Description = "Ce endpoint permet de créer une nouvelle entrée de traçabilité de mesure en fournissant les informations nécessaires dans la requête.",
+            Summary = "Crï¿½e une nouvelle traï¿½abilitï¿½ de mesure",
+            Description = "Ce endpoint permet de crï¿½er une nouvelle entrï¿½e de traï¿½abilitï¿½ de mesure en fournissant les informations nï¿½cessaires dans la requï¿½te.",
             OperationId = "CreateMeasurementTraceability"
         )]
         [HttpPost("create")]
@@ -43,16 +43,16 @@ namespace Api.Data.Controllers
             {
                 return BadRequest(new ProblemDetails
                 {
-                    Title = "Paramètre invalide",
-                    Detail = "Le corps de la requête est requis."
+                    Title = "Paramï¿½tre invalide",
+                    Detail = "Le corps de la requï¿½te est requis."
                 });
             }
             if (string.IsNullOrWhiteSpace(traceabilityDto.ProductUid))
             {
                 return BadRequest(new ProblemDetails
                 {
-                    Title = "Paramètre invalide",
-                    Detail = "Le paramètre 'ProductUid' est requis."
+                    Title = "Paramï¿½tre invalide",
+                    Detail = "Le paramï¿½tre 'ProductUid' est requis."
                 });
             }
 
@@ -91,8 +91,8 @@ namespace Api.Data.Controllers
         }
 
         [SwaggerOperation(
-            Summary = "Récupère les traçabilités de mesure par ArticleUid et OperationUid",
-            Description = "Ce endpoint retourne une collection de traçabilités de mesure correspondant à un identifiant d'article et d'opération donnés.",
+            Summary = "Rï¿½cupï¿½re les traï¿½abilitï¿½s de mesure par ArticleUid et OperationUid",
+            Description = "Ce endpoint retourne une collection de traï¿½abilitï¿½s de mesure correspondant ï¿½ un identifiant d'article et d'opï¿½ration donnï¿½s.",
             OperationId = "GetCollectionMeasurementTraceabilityByArticleUidByOperationUid"
         )]
         [HttpGet("by-article-and-operation")]
@@ -106,8 +106,8 @@ namespace Api.Data.Controllers
             {
                 return BadRequest(new ProblemDetails
                 {
-                    Title = "Paramètre invalide",
-                    Detail = "Le paramètre 'articleUid' est requis."
+                    Title = "Paramï¿½tre invalide",
+                    Detail = "Le paramï¿½tre 'articleUid' est requis."
                 });
             }
 
@@ -131,8 +131,8 @@ namespace Api.Data.Controllers
         }
 
         [SwaggerOperation(
-            Summary = "Crée une nouvelle traçabilité de mesure avec adresse MAC",
-            Description = "Ce endpoint permet de créer une nouvelle entrée de traçabilité de mesure en utilisant une adresse MAC comme valeur. L'adresse MAC sera automatiquement marquée comme utilisée.",
+            Summary = "Crï¿½e une nouvelle traï¿½abilitï¿½ de mesure avec adresse MAC",
+            Description = "Ce endpoint permet de crï¿½er une nouvelle entrï¿½e de traï¿½abilitï¿½ de mesure en utilisant une adresse MAC comme valeur. L'adresse MAC sera automatiquement marquï¿½e comme utilisï¿½e.",
             OperationId = "CreateMeasurementTraceabilityWithMac"
       )]
         [HttpPost("create-with-mac")]
@@ -146,8 +146,8 @@ namespace Api.Data.Controllers
             {
                 return BadRequest(new ProblemDetails
                 {
-                    Title = "Paramètre invalide",
-                    Detail = "Le corps de la requête est requis."
+                    Title = "Paramï¿½tre invalide",
+                    Detail = "Le corps de la requï¿½te est requis."
                 });
             }
 
@@ -155,8 +155,8 @@ namespace Api.Data.Controllers
             {
                 return BadRequest(new ProblemDetails
                 {
-                    Title = "Paramètre invalide",
-                    Detail = "Le paramètre 'ProductUid' est requis."
+                    Title = "Paramï¿½tre invalide",
+                    Detail = "Le paramï¿½tre 'ProductUid' est requis."
                 });
             }
 
@@ -164,14 +164,14 @@ namespace Api.Data.Controllers
             {
                 return BadRequest(new ProblemDetails
                 {
-                    Title = "Paramètre invalide",
-                    Detail = "Le paramètre 'Value' (adresse MAC) est requis."
+                    Title = "Paramï¿½tre invalide",
+                    Detail = "Le paramï¿½tre 'Value' (adresse MAC) est requis."
                 });
             }
 
             try
             {
-                // Vérifier que l'adresse MAC existe et est disponible
+                // Vï¿½rifier que l'adresse MAC existe et est disponible
                 var macAddress = await _macAddressRepository.GetByMacAddressValueAsync(traceabilityDto.Value);
 
                 if (macAddress == null)
@@ -179,8 +179,8 @@ namespace Api.Data.Controllers
                     Log.Warning("CreateMeasurementTraceabilityWithMac - MAC address not found: {MacAddress}", traceabilityDto.Value);
                     return NotFound(new ProblemDetails
                     {
-                        Title = "Adresse MAC non trouvée",
-                        Detail = $"L'adresse MAC '{traceabilityDto.Value}' n'existe pas dans la base de données."
+                        Title = "Adresse MAC non trouvï¿½e",
+                        Detail = $"L'adresse MAC '{traceabilityDto.Value}' n'existe pas dans la base de donnï¿½es."
                     });
                 }
 
@@ -189,8 +189,8 @@ namespace Api.Data.Controllers
                     Log.Warning("CreateMeasurementTraceabilityWithMac - MAC address already used: {MacAddress}", traceabilityDto.Value);
                     return BadRequest(new ProblemDetails
                     {
-                        Title = "Adresse MAC déjà utilisée",
-                        Detail = $"L'adresse MAC '{traceabilityDto.Value}' a déjà été utilisée."
+                        Title = "Adresse MAC dï¿½jï¿½ utilisï¿½e",
+                        Detail = $"L'adresse MAC '{traceabilityDto.Value}' a dï¿½jï¿½ ï¿½tï¿½ utilisï¿½e."
                     });
                 }
 
@@ -200,7 +200,7 @@ namespace Api.Data.Controllers
                     unitUid = traceabilityDto.UnitUid;
                 }
 
-                // Créer la traçabilité de mesure
+                // Crï¿½er la traï¿½abilitï¿½ de mesure
                 var traceability = new MeasurementTraceability
                 {
                     MeasurementTraceabilityUid = Guid.NewGuid().ToString(),
@@ -219,13 +219,13 @@ namespace Api.Data.Controllers
 
                 _traceabilityRepository.CreateMeasurementTraceability(traceability);
 
-                // Marquer l'adresse MAC comme utilisée
+                // Marquer l'adresse MAC comme utilisï¿½e
                 var updatedMacAddress = await _macAddressRepository.MarkMacAddressAsUsedAsync(traceabilityDto.Value);
 
                 if (updatedMacAddress == null)
                 {
                     Log.Error("CreateMeasurementTraceabilityWithMac - Failed to mark MAC address as used: {MacAddress}", traceabilityDto.Value);
-                    return StatusCode(StatusCodes.Status500InternalServerError, "Erreur lors de la mise à jour de l'adresse MAC.");
+                    return StatusCode(StatusCodes.Status500InternalServerError, "Erreur lors de la mise ï¿½ jour de l'adresse MAC.");
                 }
 
                 Log.Information("CreateMeasurementTraceabilityWithMac successfully created measurement traceability with UID: {MeasurementTraceabilityUid} and marked MAC {MacAddress} as USED",
