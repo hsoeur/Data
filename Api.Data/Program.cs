@@ -88,7 +88,7 @@ options.AddPolicy("AllowFrontend",
 });
 
 // Connection string from environment variables (same defaults as migrations)
-var server = Environment.GetEnvironmentVariable("MYSQL_HOST") ?? "localhost";
+var server = Environment.GetEnvironmentVariable("MYSQL_HOST") ?? "mysql-prod";
 var port = Environment.GetEnvironmentVariable("MYSQL_PORT") ?? "3306";
 var databaseName = Environment.GetEnvironmentVariable("MYSQL_DATABASE") ?? "db_production";
 var user = Environment.GetEnvironmentVariable("MYSQL_USER") ?? "user";
