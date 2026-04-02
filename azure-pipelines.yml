@@ -90,3 +90,8 @@ stages:
         echo "🚀 Déploiement du nouveau conteneur..."
         echo $(SSH_PASSWORD) | plink -batch -pw $(SSH_PASSWORD) $(SERVER_USER)@$(SERVER_IP) "docker run -d --name $(CONTAINER_NAME) --restart unless-stopped -p $(APP_PORT):$(APP_PORT) -v C:\Logs\Containers\$(CONTAINER_NAME):/app/Logs $(IMAGE_NAME):latest"
       displayName: "🚀 Démarrer le nouveau conteneur avec montage de volume"
+
+    - script: |
+        echo "🔗 Connexion du conteneur au réseau database_default..."
+        echo $(SSH_PASSWORD) | plink -batch -pw $(SSH_PASSWORD) $(SERVER_USER)@$(SERVER_IP) "docker network connect database_default $(CONTAINER_NAME)"
+      displayName: "🔗 Connecter le conteneur au réseau Docker"
