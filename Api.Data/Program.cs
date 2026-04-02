@@ -1,36 +1,38 @@
-using System.Diagnostics;
-using System.Linq;
-using DataLib;
 using Api.Data.Repositories;
+using Api.Data.Repositories.ArticleRepo;
+using Api.Data.Repositories.FirmwareVersionRepo;
+using Api.Data.Repositories.BillOfMaterialRepo;
+using Api.Data.Repositories.DatabaseNotificationRepo;
+using Api.Data.Repositories.FirmwareRepo;
+using Api.Data.Repositories.KitAccTraceabilityRepo;
+using Api.Data.Repositories.KitTraceabilityRepo;
+using Api.Data.Repositories.LabelRepo;
+using Api.Data.Repositories.LabelTemplateRepo;
+using Api.Data.Repositories.LabelTypeRepo;
+using Api.Data.Repositories.MacAddressRepo;
+using Api.Data.Repositories.MachineRepo;
 using Api.Data.Repositories.ManufacturingOrderNotificationRepo;
+using Api.Data.Repositories.ManufacturingOrderRepo;
+using Api.Data.Repositories.MeasurementTraceabilityRepo;
+using Api.Data.Repositories.OperationRepo;
+using Api.Data.Repositories.OrderLineRepo;
+using Api.Data.Repositories.ProductTraceabilityRepo;
+using Api.Data.Repositories.SequenceRepo;
+using Api.Data.Repositories.SimCardRepo;
+using Api.Data.Repositories.SolderingProgramRepo;
+using Api.Data.Repositories.ToleranceRepo;
+using Api.Data.Repositories.UserRepo;
+using Api.Data.Repositories.PackagingLocationPhotoRepo;
+using Api.Data.Swagger;
+using DataLib;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.EntityFrameworkCore;
-using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using Microsoft.OpenApi.Models;
-using Api.Data.Swagger;
-using Api.Data.Repositories.ArticleRepo;
-using Api.Data.Repositories.ManufacturingOrderRepo;
-using Api.Data.Repositories.BillOfMaterialRepo;
-using Api.Data.Repositories.FirmwareRepo;
-using Api.Data.Repositories.UserRepo;
-using Api.Data.Repositories.MachineRepo;
-using Api.Data.Repositories.OperationRepo;
-using Api.Data.Repositories.SequenceRepo;
-using Api.Data.Repositories.ProductTraceabilityRepo;
-using Api.Data.Repositories.LabelTypeRepo;
-using Api.Data.Repositories.LabelTemplateRepo;
-using Api.Data.Repositories.SolderingProgramRepo;
-using Api.Data.Repositories.SimCardRepo;
-using Api.Data.Repositories.OrderLineRepo;
-using Api.Data.Repositories.ArticleVersionRepo;
-using Api.Data.Repositories.DatabaseNotificationRepo;
-using Api.Data.Repositories.LabelRepo;
-using Api.Data.Repositories.KitTraceabilityRepo;
-using Api.Data.Repositories.KitAccTraceabilityRepo;
-using Api.Data.Repositories.MeasurementTraceabilityRepo;
-using Api.Data.Repositories.MacAddressRepo;
+using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 using Serilog;
+using System.Diagnostics;
+using System.Linq;
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()
@@ -66,11 +68,11 @@ builder.Services.AddSwaggerGen(options =>
     {
         Title = "Api.Data",
      Version = "v1",
-    Description = "Uniformisation et centralisation des appels aux données de production."
+    Description = "Uniformisation et centralisation des appels aux donnï¿½es de production."
     });
     // Active les annotations (SwaggerOperation, SwaggerSchema, etc.)
     options.EnableAnnotations();
-    // Ajoute la note générale sur chaque opération
+    // Ajoute la note gï¿½nï¿½rale sur chaque opï¿½ration
     options.OperationFilter<CommonOperationDescriptionFilter>();
 });
 builder.Services.AddControllers();
@@ -142,6 +144,8 @@ builder.Services.AddScoped<IKitTraceabilityRepository, KitTraceabilityRepository
 builder.Services.AddScoped<IKitAccTraceabilityRepository, KitAccTraceabilityRepository>();
 builder.Services.AddScoped<IMeasurementTraceabilityRepository, MeasurementTraceabilityRepository>();
 builder.Services.AddScoped<IMacAddressRepository, MacAddressRepository>();
+builder.Services.AddScoped<IToleranceRepository, ToleranceRepository>();
+builder.Services.AddScoped<IPackagingLocationPhotoRepository, PackagingLocationPhotoRepository>();
 
 var app = builder.Build();
 

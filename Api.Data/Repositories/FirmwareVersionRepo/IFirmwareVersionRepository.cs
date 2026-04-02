@@ -1,6 +1,6 @@
 ﻿using DataLib;
 
-namespace Api.Data.Repositories.ArticleVersionRepo
+namespace Api.Data.Repositories.FirmwareVersionRepo
 {
     public interface IFirmwareVersionRepository
     {

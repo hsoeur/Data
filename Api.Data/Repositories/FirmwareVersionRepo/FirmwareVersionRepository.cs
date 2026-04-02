@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
-namespace Api.Data.Repositories.ArticleVersionRepo
+namespace Api.Data.Repositories.FirmwareVersionRepo
 {
     public class FirmwareVersionRepository : IFirmwareVersionRepository
     {

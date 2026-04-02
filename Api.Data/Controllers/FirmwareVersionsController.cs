@@ -1,4 +1,4 @@
-﻿using Api.Data.Repositories.ArticleVersionRepo;
+﻿using Api.Data.Repositories.FirmwareVersionRepo;
 using DataLib;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
