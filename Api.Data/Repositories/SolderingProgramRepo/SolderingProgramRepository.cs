@@ -220,23 +220,23 @@ namespace Api.Data.Repositories.SolderingProgramRepo
             }
         }
 
-        public async Task<SolderingProgram?> GetSolderingProgramByManufacturingOrderUid(int manufacturingOrderUid)
+        public async Task<List<SolderingProgram>> GetSolderingProgramByManufacturingOrderUid(int manufacturingOrderUid)
         {
             try
             {
                 var of = await _context.ManufacturingOrders.FirstOrDefaultAsync(o => o.ManufacturingOrderUid == manufacturingOrderUid);
                 if (of == null)
                 {
-                    return null;
+                    return new List<SolderingProgram>();
                 }
 
                 var now = DateTimeOffset.Now;
-                var solderingProgram = await _context.SolderingPrograms
+                var solderingPrograms = await _context.SolderingPrograms
                     .Where(soldering => soldering.ProductUid == of.ProductUid && soldering.EndDate > now)
                     .OrderByDescending(s => s.StartDate)
-                    .FirstOrDefaultAsync();
+                    .ToListAsync();
 
-                return solderingProgram;
+                return solderingPrograms;
             }
             catch (Exception ex)
             {

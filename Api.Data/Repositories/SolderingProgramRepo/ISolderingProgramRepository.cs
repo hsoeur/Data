@@ -10,6 +10,6 @@ namespace Api.Data.Repositories.SolderingProgramRepo
         Task<List<SolderingProgram>> GetCollectionSolderingProgramsByKeywordActiveOnes(string keyword);
         Task<SolderingProgram> UpdateSolderingProgram(SolderingProgram solderingProgram);
         Task<SolderingProgram> CreateSolderingProgram(SolderingProgram solderingProgram);
-        Task<SolderingProgram?> GetSolderingProgramByManufacturingOrderUid(int manufacturingOrderUid);
+        Task<List<SolderingProgram>> GetSolderingProgramByManufacturingOrderUid(int manufacturingOrderUid);
     }
 }

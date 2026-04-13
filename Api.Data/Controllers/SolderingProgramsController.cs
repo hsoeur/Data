@@ -253,7 +253,7 @@ namespace Api.Data.Controllers
         [SwaggerOperation(
             Summary = "Récupère le dernier programme de soudure par OF",
             Description = "Retourne le dernier programme de soudure pour un ordre de fabrication.",
-            OperationId = "GetSolderingProgramByManufacturingOrderUidLatestOne"
+            OperationId = "GetSolderingProgramByManufacturingOrderUid"
         )]
         [HttpGet("latest-by-manufacturing-order")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(SolderingProgram))]
@@ -262,28 +262,30 @@ namespace Api.Data.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<SolderingProgram>> GetSolderingProgramByManufacturingOrderUidLatestOne([FromQuery] int manufacturingOfUid)
         {
-            if (manufacturingOfUid <=0)
+            if (manufacturingOfUid <= 0)
             {
                 return BadRequest(new ProblemDetails { Title = "Paramètre invalide", Detail = "Le paramètre 'manufacturingOfUid' est requis et doit être >0." });
             }
 
             try
             {
-                Log.Information("GetSolderingProgramByManufacturingOrderUidLatestOne called with manufacturingOfUid={ManufacturingOfUid}", manufacturingOfUid);
-                var solderingProgram = await _solderingProgramsRepository.GetSolderingProgramByManufacturingOrderUid(manufacturingOfUid);
-                if (solderingProgram == null)
+                Log.Information("GetSolderingProgramByManufacturingOrderUid called with manufacturingOfUid={ManufacturingOfUid}", manufacturingOfUid);
+                var solderingPrograms = await _solderingProgramsRepository.GetSolderingProgramByManufacturingOrderUid(manufacturingOfUid);
+                if (solderingPrograms == null || !solderingPrograms.Any())
                 {
-                    Log.Information("No soldering program found for manufacturingOfUid={ManufacturingOfUid}", manufacturingOfUid);
-                    return NotFound($"No soldering program found for manufacturing order UID: {manufacturingOfUid}");
+                    Log.Information("No soldering programs found for manufacturingOfUid={ManufacturingOfUid}", manufacturingOfUid);
+                    return NoContent();
                 }
-                Log.Information("GetSolderingProgramByManufacturingOrderUidLatestOne successfully returned a program for manufacturingOfUid={ManufacturingOfUid}", manufacturingOfUid);
-                return Ok(solderingProgram);
+                Log.Information("GetSolderingProgramByManufacturingOrderUid successfully returned {Count} programs for manufacturingOfUid={ManufacturingOfUid}", solderingPrograms.Count, manufacturingOfUid);
+                return Ok(solderingPrograms);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Unexpected error occurred while fetching the soldering program for manufacturingOfUid={ManufacturingOfUid}", manufacturingOfUid);
+                Log.Error(ex, "Unexpected error occurred while fetching the soldering programs for manufacturingOfUid={ManufacturingOfUid}", manufacturingOfUid);
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+
+        
     }
 }
