@@ -62,5 +62,33 @@ namespace Api.Data.Repositories.KitTraceabilityRepo
                 throw; // Rethrow the exception to be handled upstream
             }
         }
+
+        public async Task<KitTraceability?> GetKitByProductUidAndSerialNumber(string productUid, int serialNumber)
+        {
+            Log.Information("GetKitByManufacturingOrderAndSerialNumber called with manufacturingOrderUid: {ManufacturingOrderUid}, serialNumber: {SerialNumber}", productUid, serialNumber);
+
+            try
+            {
+                var kit = await _context.KitTraceabilities
+                    .Where(k => k.Product == productUid && k.SerialNumber == serialNumber)
+                    .FirstOrDefaultAsync();
+
+                if (kit == null)
+                {
+                    Log.Information("No Kit found with manufacturingOrderUid: {ManufacturingOrderUid} and serialNumber: {SerialNumber}", productUid, serialNumber);
+                }
+                else
+                {
+                    Log.Information("Kit found: {Kit}", kit);
+                }
+
+                return kit;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to get kit with manufacturingOrderUid: {ManufacturingOrderUid} and serialNumber: {SerialNumber}", productUid, serialNumber);
+                throw;
+            }
+        }
     }
 }

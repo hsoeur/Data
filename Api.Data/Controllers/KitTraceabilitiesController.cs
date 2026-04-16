@@ -117,5 +117,50 @@ namespace Api.Data.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+
+        [SwaggerOperation(
+            Summary = "Récupère un kit par numéro d'OF et numéro de série",
+            Description = "Ce endpoint permet de récupérer un kit spécifique en fournissant l'identifiant de l'ordre de fabrication et le numéro de série.",
+            OperationId = "GetKitByManufacturingOrderAndSerialNumber"
+        )]
+        [HttpGet("by-product-serial")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(KitTraceability))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<KitTraceability>> GetKitByProductAndSerialNumber(
+            [FromQuery] string productUid,
+            [FromQuery] int serialNumber)
+        {
+            
+
+            try
+            {
+                Log.Information("GetKitByManufacturingOrderAndSerialNumber called with productUid: {productUid}, serialNumber: {SerialNumber}",
+                    productUid, serialNumber);
+
+                var kit = await _kitRepository.GetKitByProductUidAndSerialNumber(productUid, serialNumber);
+
+                if (kit == null)
+                {
+                    Log.Information("Kit not found for manufacturingOrderUid: {ManufacturingOrderUid}, serialNumber: {SerialNumber}",
+                        productUid, serialNumber);
+                    return NotFound(new ProblemDetails
+                    {
+                        Title = "Kit non trouvé",
+                        Detail = $"Aucun kit trouvé pour l'OF {productUid} et le numéro de série {serialNumber}."
+                    });
+                }
+
+                Log.Information("Kit found successfully: {KitUid}", kit.KitTraceabilityUid);
+                return Ok(kit);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Exception occurred while getting kit for productUid: {productUid}, serialNumber: {SerialNumber}",
+                    productUid, serialNumber);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
     }
 }
