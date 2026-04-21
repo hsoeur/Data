@@ -147,6 +147,41 @@ namespace Migrations.Migrations
                     b.ToTable("DatabaseNotifications");
                 });
 
+            modelBuilder.Entity("DataLib.DeviceIdentity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("EquipSN")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("MacAddressValue")
+                        .IsRequired()
+                        .HasMaxLength(17)
+                        .HasColumnType("char(17)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EquipSN")
+                        .IsUnique();
+
+                    b.HasIndex("MacAddressValue")
+                        .IsUnique();
+
+                    b.ToTable("DeviceIdentities");
+                });
+
             modelBuilder.Entity("DataLib.Firmware", b =>
                 {
                     b.Property<string>("FirmwareUid")

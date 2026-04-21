@@ -3,6 +3,7 @@ using Api.Data.Repositories.ArticleRepo;
 using Api.Data.Repositories.FirmwareVersionRepo;
 using Api.Data.Repositories.BillOfMaterialRepo;
 using Api.Data.Repositories.DatabaseNotificationRepo;
+using Api.Data.Repositories.DeviceIdentityRepo;
 using Api.Data.Repositories.FirmwareRepo;
 using Api.Data.Repositories.KitAccTraceabilityRepo;
 using Api.Data.Repositories.KitTraceabilityRepo;
@@ -144,6 +145,7 @@ builder.Services.AddScoped<IKitTraceabilityRepository, KitTraceabilityRepository
 builder.Services.AddScoped<IKitAccTraceabilityRepository, KitAccTraceabilityRepository>();
 builder.Services.AddScoped<IMeasurementTraceabilityRepository, MeasurementTraceabilityRepository>();
 builder.Services.AddScoped<IMacAddressRepository, MacAddressRepository>();
+builder.Services.AddScoped<IDeviceIdentityRepository, DeviceIdentityRepository>();
 builder.Services.AddScoped<IToleranceRepository, ToleranceRepository>();
 builder.Services.AddScoped<IPackagingLocationPhotoRepository, PackagingLocationPhotoRepository>();
 

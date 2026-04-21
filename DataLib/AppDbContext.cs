@@ -37,11 +37,21 @@ namespace DataLib
         public DbSet<KitTraceability> KitTraceabilities { get; set; }
         public DbSet<KitAccTraceability> KitAccTraceabilities { get; set; }
         public DbSet<MacAddress> MacAddresses { get; set; }
+        public DbSet<DeviceIdentity> DeviceIdentities { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Let EF Core infer the model from data annotations in ManufacturingOrder
             base.OnModelCreating(modelBuilder);
+
+            // Configure unique constraints for DeviceIdentity
+            modelBuilder.Entity<DeviceIdentity>()
+                .HasIndex(d => d.EquipSN)
+                .IsUnique();
+
+            modelBuilder.Entity<DeviceIdentity>()
+                .HasIndex(d => d.MacAddressValue)
+                .IsUnique();
 
             // Disable cascade delete globally to avoid unintended deletions during GenDb updates
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
