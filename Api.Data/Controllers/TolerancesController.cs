@@ -10,11 +10,11 @@ namespace Api.Data.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Produces("application/json")]
-    public class ToleranceController : ControllerBase
+    public class TolerancesController : ControllerBase
     {
         private readonly IToleranceRepository _toleranceRepository;
 
-        public ToleranceController(IToleranceRepository toleranceRepository)
+        public TolerancesController(IToleranceRepository toleranceRepository)
         {
             _toleranceRepository = toleranceRepository;
         }
@@ -109,7 +109,7 @@ namespace Api.Data.Controllers
             Description = "Ce endpoint retourne les tolérances les plus récentes en fonction des critères fournis (ProductUid, OperationNumber, Machine).",
             OperationId = "GetCollectionTolerancesByProductUidByOperationUidByMachineUidLatestOne"
         )]
-        [HttpGet("latest-by-product-operation-machine")]
+        [HttpGet("latest-by-product-operation-and-machine")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ICollection<Tolerance>))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
