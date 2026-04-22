@@ -9,7 +9,6 @@ namespace Api.Data.Repositories.DeviceIdentityRepo
         Task<DeviceIdentity?> GetByEquipSNAsync(string equipSN);
         Task<DeviceIdentity?> GetByMacAddressValueAsync(string macAddressValue);
         Task<DeviceIdentity> CreateAsync(DeviceIdentity deviceIdentity);
-        Task<bool> UpdateAsync(DeviceIdentity deviceIdentity);
         Task<bool> DeleteAsync(int id);
         Task<bool> DeleteByEquipSNAsync(string equipSN);
     }

@@ -159,63 +159,7 @@ namespace Api.Data.Controllers
             }
         }
 
-        [SwaggerOperation(Summary = "Met à jour une association appareil", OperationId = "UpdateDeviceIdentity")]
-        [HttpPut("update")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status409Conflict)]
-        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> UpdateDeviceIdentity([FromBody] DeviceIdentity deviceIdentity)
-        {
-            if (deviceIdentity == null)
-            {
-                return BadRequest(new ProblemDetails { Title = "Paramètre invalide", Detail = "Le corps de la requête est requis." });
-            }
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            try
-            {
-                // Vérifier si l'EquipSN existe déjà pour un autre ID
-                var existingByEquipSN = await _repository.GetByEquipSNAsync(deviceIdentity.EquipSN);
-                if (existingByEquipSN != null && existingByEquipSN.Id != deviceIdentity.Id)
-                {
-                    return Conflict(new ProblemDetails
-                    {
-                        Title = "Conflit de duplication",
-                        Detail = $"Un autre appareil avec le numéro de série '{deviceIdentity.EquipSN}' existe déjà."
-                    });
-                }
-
-                // Vérifier si la MAC existe déjà pour un autre ID
-                var existingByMac = await _repository.GetByMacAddressValueAsync(deviceIdentity.MacAddressValue);
-                if (existingByMac != null && existingByMac.Id != deviceIdentity.Id)
-                {
-                    return Conflict(new ProblemDetails
-                    {
-                        Title = "Conflit de duplication",
-                        Detail = $"Un autre appareil avec l'adresse MAC '{deviceIdentity.MacAddressValue}' existe déjà."
-                    });
-                }
-
-                var updated = await _repository.UpdateAsync(deviceIdentity);
-                if (!updated)
-                {
-                    Log.Information("UpdateDeviceIdentity not found for id: {Id}", deviceIdentity.Id);
-                    return NotFound($"Association appareil avec ID {deviceIdentity.Id} introuvable.");
-                }
-                Log.Information("UpdateDeviceIdentity updated association with id: {Id}", deviceIdentity.Id);
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "UpdateDeviceIdentity failed for ID {Id}", deviceIdentity?.Id);
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Erreur lors de la mise à jour de l'association appareil: {ex.Message}");
-            }
-        }
+        
 
        
     }

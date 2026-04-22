@@ -130,42 +130,6 @@ namespace Api.Data.Repositories.DeviceIdentityRepo
                 throw;
             }
         }
-
-        public async Task<bool> UpdateAsync(DeviceIdentity deviceIdentity)
-        {
-            Log.Information("DeviceIdentityRepository:UpdateAsync - start id: {Id}", deviceIdentity?.Id);
-            try
-            {
-                var exists = await _context.DeviceIdentities.AnyAsync(d => d.Id == deviceIdentity.Id);
-                if (!exists)
-                {
-                    Log.Information("DeviceIdentityRepository:UpdateAsync - id {Id} not found", deviceIdentity.Id);
-                    return false;
-                }
-
-                deviceIdentity.UpdatedAt = DateTime.UtcNow;
-                _context.DeviceIdentities.Update(deviceIdentity);
-                await _context.SaveChangesAsync();
-                Log.Information("DeviceIdentityRepository:UpdateAsync - updated id: {Id}", deviceIdentity.Id);
-                return true;
-            }
-            catch (DbUpdateConcurrencyException concEx)
-            {
-                Log.Error(concEx, "DeviceIdentityRepository:UpdateAsync - concurrency error for id {Id}", deviceIdentity?.Id);
-                throw;
-            }
-            catch (DbUpdateException dbEx)
-            {
-                Log.Error(dbEx, "DeviceIdentityRepository:UpdateAsync - database update exception for id {Id}", deviceIdentity?.Id);
-                throw;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "DeviceIdentityRepository:UpdateAsync - unexpected error for id {Id}", deviceIdentity?.Id);
-                throw;
-            }
-        }
-
         public async Task<bool> DeleteAsync(int id)
         {
             Log.Information("DeviceIdentityRepository:DeleteAsync - start id: {Id}", id);

@@ -155,7 +155,7 @@ namespace Migrations.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime>("CreationDate")
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("EquipSN")
@@ -167,9 +167,6 @@ namespace Migrations.Migrations
                         .IsRequired()
                         .HasMaxLength(17)
                         .HasColumnType("char(17)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 

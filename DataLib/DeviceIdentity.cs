@@ -41,12 +41,8 @@ namespace DataLib
         /// </summary>
         [Required]
         [SwaggerSchema(Description = "Date et heure de création de l'association.")]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreationDate { get; set; } = DateTime.UtcNow;
 
-        /// <summary>
-        /// Timestamp when the device identity was last updated
-        /// </summary>
-        [SwaggerSchema(Description = "Date et heure de dernière mise à jour de l'association.")]
-        public DateTime? UpdatedAt { get; set; }
+       
     }
 }
