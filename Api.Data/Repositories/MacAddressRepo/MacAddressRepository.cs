@@ -9,6 +9,8 @@ namespace Api.Data.Repositories.MacAddressRepo
         private readonly AppDbContext _context;
         private static readonly SemaphoreSlim _reservationLock = new SemaphoreSlim(1, 1);
         private static readonly TimeSpan _reservationTimeout = TimeSpan.FromMinutes(10);
+        private const string StartMacAddress = "14:2D:F5:00:3B:5B";
+        private const string MacPrefix = "14:2D:F5";
 
         public MacAddressRepository(AppDbContext context)
         {
@@ -283,6 +285,133 @@ namespace Api.Data.Repositories.MacAddressRepo
                 Log.Error(ex, "MacAddressRepository:DeleteAsync - unexpected error for id {Id}", id);
                 throw;
             }
+        }
+
+        public async Task<MacAddress> GenerateAndReserveNextMacAddressAsync()
+        {
+            Log.Information("MacAddressRepository:GenerateAndReserveNextMacAddressAsync - waiting for lock");
+         await _reservationLock.WaitAsync();
+            
+         try
+         {
+      Log.Information("MacAddressRepository:GenerateAndReserveNextMacAddressAsync - lock acquired, starting transaction");
+ 
+         // Use the execution strategy to handle transactions with retry logic
+                var strategy = _context.Database.CreateExecutionStrategy();
+    
+          return await strategy.ExecuteAsync(async () =>
+        {
+using var transaction = await _context.Database.BeginTransactionAsync();
+        
+  try
+    {
+             // Retrieve the last inserted MAC address with row-level lock
+      var lastMac = await _context.MacAddresses
+          .OrderByDescending(m => m.Id)
+            .FirstOrDefaultAsync();
+
+     string nextMacAddress;
+
+        if (lastMac == null)
+                 {
+    // Table is empty, start with the initial MAC address
+        nextMacAddress = StartMacAddress;
+          Log.Information("MacAddressRepository:GenerateAndReserveNextMacAddressAsync - table empty, starting with {MacAddress}", nextMacAddress);
+           }
+     else
+     {
+    // Convert MAC to long, increment, and convert back
+long macAsLong = MacToLong(lastMac.MacAddressValue);
+        macAsLong++;
+        nextMacAddress = LongToMac(macAsLong);
+   
+     Log.Information("MacAddressRepository:GenerateAndReserveNextMacAddressAsync - incremented from {LastMac} to {NextMac}", 
+                   lastMac.MacAddressValue, nextMacAddress);
+         }
+
+      // Verify the prefix to prevent overflow
+   if (!nextMacAddress.StartsWith(MacPrefix, StringComparison.OrdinalIgnoreCase))
+          {
+      Log.Error("MacAddressRepository:GenerateAndReserveNextMacAddressAsync - MAC address overflow detected. Generated MAC {MacAddress} does not start with prefix {Prefix}", 
+       nextMacAddress, MacPrefix);
+     throw new InvalidOperationException($"MAC address overflow: generated address {nextMacAddress} does not start with required prefix {MacPrefix}");
+}
+
+          // Insert the new MAC address with RESERVED status
+     var newMacAddress = new MacAddress
+      {
+      MacAddressValue = nextMacAddress,
+                     Status = MacAddressStatus.RESERVED,
+      ReservedAt = DateTime.UtcNow,
+      CreatedAt = DateTime.UtcNow
+ };
+
+          _context.MacAddresses.Add(newMacAddress);
+    await _context.SaveChangesAsync();
+  await transaction.CommitAsync();
+
+               Log.Information("MacAddressRepository:GenerateAndReserveNextMacAddressAsync - successfully created and reserved MAC Id={Id} Address={MacAddress}", 
+         newMacAddress.Id, newMacAddress.MacAddressValue);
+
+       return newMacAddress;
+       }
+             catch
+     {
+     await transaction.RollbackAsync();
+   Log.Information("MacAddressRepository:GenerateAndReserveNextMacAddressAsync - transaction rolled back");
+                throw;
+         }
+     });
+ }
+          catch (Exception ex)
+       {
+      Log.Error(ex, "MacAddressRepository:GenerateAndReserveNextMacAddressAsync - error occurred");
+             throw;
+        }
+   finally
+            {
+                _reservationLock.Release();
+       Log.Information("MacAddressRepository:GenerateAndReserveNextMacAddressAsync - lock released");
+            }
+        }
+
+        /// <summary>
+        /// Converts a MAC address string (AA:BB:CC:DD:EE:FF) to a 48-bit long integer
+        /// </summary>
+        private static long MacToLong(string mac)
+        {
+            if (string.IsNullOrWhiteSpace(mac))
+            {
+             throw new ArgumentException("MAC address cannot be null or empty", nameof(mac));
+  }
+
+            // Remove colons and parse as hexadecimal
+   string hexString = mac.Replace(":", "");
+            
+     if (hexString.Length != 12)
+    {
+  throw new ArgumentException($"Invalid MAC address format: {mac}. Expected format: AA:BB:CC:DD:EE:FF", nameof(mac));
+            }
+
+   return Convert.ToInt64(hexString, 16);
+  }
+
+        /// <summary>
+        /// Converts a 48-bit long integer to a MAC address string (AA:BB:CC:DD:EE:FF)
+        /// </summary>
+        private static string LongToMac(long value)
+    {
+      if (value < 0 || value > 0xFFFFFFFFFFFF)
+            {
+         throw new ArgumentOutOfRangeException(nameof(value), "Value must be a valid 48-bit MAC address (0 to 281474976710655)");
+   }
+
+       // Convert to 12-character hex string with leading zeros
+   string hexString = value.ToString("X12");
+
+            // Format as AA:BB:CC:DD:EE:FF
+      return $"{hexString.Substring(0, 2)}:{hexString.Substring(2, 2)}:{hexString.Substring(4, 2)}:" +
+         $"{hexString.Substring(6, 2)}:{hexString.Substring(8, 2)}:{hexString.Substring(10, 2)}";
         }
     }
 }

@@ -19,7 +19,7 @@ namespace Api.Data.Controllers
             _repository = repository;
         }
 
-        [SwaggerOperation(Summary = "R�cup�re la prochaine adresse MAC disponible", OperationId = "GetNextMac")]
+        [SwaggerOperation(Summary = "Récupère la prochaine adresse MAC disponible", OperationId = "GetNextMac")]
         [HttpGet("next-mac")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(NextMacAddressDto))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -29,19 +29,9 @@ namespace Api.Data.Controllers
             try
             {
                 Log.Information("GetNextMac called");
-                var macAddress = await _repository.ReserveNextMacAddressAsync();
+                var macAddress = await _repository.GenerateAndReserveNextMacAddressAsync();
 
-                if (macAddress == null)
-                {
-                    Log.Warning("No MAC available");
-                    return NotFound(new ProblemDetails
-                    {
-                        Title = "Aucune adresse MAC disponible",
-                        Detail = "Aucune adresse MAC avec le statut 'AVAILABLE' n'a �t� trouv�e."
-                    });
-                }
-
-                Log.Information("MAC requested -> Id={Id} Address={MacAddress}", macAddress.Id, macAddress.MacAddressValue);
+                Log.Information("MAC generated and reserved -> Id={Id} Address={MacAddress}", macAddress.Id, macAddress.MacAddressValue);
 
                 var result = new NextMacAddressDto
                 {
@@ -51,10 +41,23 @@ namespace Api.Data.Controllers
 
                 return Ok(result);
             }
+            catch (InvalidOperationException ex)
+            {
+                Log.Error(ex, "GetNextMac failed - MAC address overflow");
+                return StatusCode(StatusCodes.Status500InternalServerError, new ProblemDetails
+                {
+                    Title = "Dépassement de la plage d'adresses MAC",
+                    Detail = ex.Message
+                });
+            }
             catch (System.Exception ex)
             {
                 Log.Error(ex, "GetNextMac failed");
-                return StatusCode(StatusCodes.Status500InternalServerError, $"Erreur lors de la r�cup�ration de la prochaine adresse MAC: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, new ProblemDetails
+                {
+                    Title = "Erreur lors de la génération de l'adresse MAC",
+                    Detail = $"Erreur lors de la récupération de la prochaine adresse MAC: {ex.Message}"
+                });
             }
         }
 

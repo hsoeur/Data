@@ -13,5 +13,6 @@ namespace Api.Data.Repositories.MacAddressRepo
         Task<MacAddress> CreateAsync(MacAddress macAddress);
         Task<bool> UpdateAsync(MacAddress macAddress);
         Task<bool> DeleteAsync(int id);
+        Task<MacAddress> GenerateAndReserveNextMacAddressAsync();
     }
 }
