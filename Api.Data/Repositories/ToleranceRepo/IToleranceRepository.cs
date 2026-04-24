@@ -8,5 +8,7 @@ namespace Api.Data.Repositories.ToleranceRepo
         Task CreateTolerance(Tolerance tolerance);
         Task<List<Tolerance>> GetCollectionTolerances();
         Task<List<Tolerance>> GetCollectionTolerancesByProductUidByOperationByMachineLatestOne(string productUid, int operationNumber, string machine);
+        Task<Tolerance?> UpdateTolerance(string toleranceUid, Tolerance tolerance);
+        Task<List<Tolerance>> GetActiveTolerances();
     }
 }

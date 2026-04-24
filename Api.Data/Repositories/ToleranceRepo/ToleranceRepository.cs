@@ -82,7 +82,7 @@ namespace Api.Data.Repositories.ToleranceRepo
 
                 // Filtrer EndDate à la valeur max
                 var filteredResults = mergedResults
-                    .Where(t => t.EndDate == new DateTimeOffset(9999,12,31,23,59,59, TimeSpan.Zero))
+                    .Where(t => t.EndDate == new DateTimeOffset(9999, 12, 31, 23, 59, 59, TimeSpan.Zero))
                     .ToList();
 
                 // Distinct par Label, priorisant MachineUid exact
@@ -104,6 +104,83 @@ namespace Api.Data.Repositories.ToleranceRepo
                 // Log de l'erreur
                 Log.Error(ex, "An error occurred while fetching tolerances for ProductUid: {ProductUid}, OperationNumber: {OperationNumber}, Machine: {Machine}",
                           productUid, operationNumber, machine);
+                throw;
+            }
+        }
+
+        public async Task<Tolerance?> UpdateTolerance(string toleranceUid, Tolerance tolerance)
+        {
+            Log.Information("UpdateTolerance called with toleranceUid: {ToleranceUid}, tolerance: {@Tolerance}", toleranceUid, tolerance);
+
+            try
+            {
+                var existingTolerance = await _context.Tolerances
+                    .FirstOrDefaultAsync(t => t.ToleranceUid == toleranceUid);
+
+                if (existingTolerance == null)
+                {
+                    Log.Warning("Tolerance with uid {ToleranceUid} not found", toleranceUid);
+                    return null;
+                }
+
+                // Historisation: fermer l'ancienne tolérance en mettant EndDate à aujourd'hui
+                existingTolerance.EndDate = DateTimeOffset.UtcNow;
+
+                Log.Information("Closing existing tolerance {ToleranceUid} with EndDate: {EndDate}", toleranceUid, existingTolerance.EndDate);
+
+                // Créer une nouvelle tolérance avec les nouvelles valeurs
+                var newTolerance = new Tolerance
+                {
+                    ToleranceUid = Guid.NewGuid().ToString(),
+                    ProductUid = tolerance.ProductUid,
+                    OperationNumber = tolerance.OperationNumber,
+                    Label = tolerance.Label,
+                    MachineUid = tolerance.MachineUid,
+                    Unit = tolerance.Unit,
+                    Val1 = tolerance.Val1,
+                    Val2 = tolerance.Val2,
+                    Mode = tolerance.Mode,
+                    UserUid = tolerance.UserUid,
+                    StartDate = DateTimeOffset.UtcNow,
+                    EndDate = new DateTimeOffset(9999, 12, 31, 23, 59, 59, TimeSpan.Zero)
+                };
+
+                _context.Tolerances.Add(newTolerance);
+                await _context.SaveChangesAsync();
+
+                Log.Information("Successfully created new tolerance: {@Tolerance}", newTolerance);
+
+                return newTolerance;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex.InnerException, "Failed to update tolerance with uid {ToleranceUid}. Exception: {Exception}", toleranceUid, ex);
+                throw;
+            }
+        }
+
+        public async Task<List<Tolerance>> GetActiveTolerances()
+        {
+            Log.Information("GetActiveTolerances called");
+
+            try
+            {
+                var currentDate = DateTimeOffset.UtcNow;
+
+                var activeTolerances = await _context.Tolerances
+                    .Where(t => t.StartDate <= currentDate && t.EndDate >= currentDate)
+                    .OrderBy(u => u.ProductUid)
+                    .ThenBy(u => u.OperationNumber)
+                    .ThenBy(u => u.Label)
+                    .ToListAsync();
+
+                Log.Information("Retrieved {Count} active tolerances", activeTolerances.Count);
+
+                return activeTolerances;
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to retrieve active tolerances. Exception: {Exception}", ex);
                 throw;
             }
         }

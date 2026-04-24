@@ -139,5 +139,105 @@ namespace Api.Data.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+
+        [SwaggerOperation(
+            Summary = "Met à jour une tolérance existante",
+            Description = "Ce endpoint permet de mettre à jour une tolérance existante identifiée par son ToleranceUid.",
+            OperationId = "UpdateTolerance"
+        )]
+        [HttpPut("update/{toleranceUid}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(Tolerance))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<Tolerance>> UpdateTolerance([FromRoute] string toleranceUid, [FromBody] ToleranceDto request)
+        {
+            if (string.IsNullOrWhiteSpace(toleranceUid))
+            {
+                return BadRequest(new ProblemDetails { Title = "Paramètre invalide", Detail = "Le paramètre 'toleranceUid' est requis." });
+            }
+
+            if (request == null)
+            {
+                return BadRequest(new ProblemDetails { Title = "Paramètre invalide", Detail = "Le corps de la requête est requis." });
+            }
+
+            if (string.IsNullOrWhiteSpace(request.ProductUid))
+            {
+                return BadRequest(new ProblemDetails { Title = "Paramètre invalide", Detail = "Le paramètre 'ProductUid' est requis." });
+            }
+
+            Log.Information("UpdateTolerance called with toleranceUid: {ToleranceUid}, request: {@Request}", toleranceUid, request);
+
+            try
+            {
+                var tolerance = new Tolerance
+                {
+                    ToleranceUid = toleranceUid,
+                    ProductUid = request.ProductUid,
+                    OperationNumber = request.OperationNumber,
+                    Label = request.Label,
+                    MachineUid = request.MachineUid,
+                    Unit = request.Unit,
+                    Val1 = request.Val1,
+                    Val2 = request.Val2,
+                    Mode = request.Mode,
+                    UserUid = request.UserUid,
+                    StartDate = request.StartDate,
+                    EndDate = request.EndDate
+                };
+
+                var updatedTolerance = await _toleranceRepository.UpdateTolerance(toleranceUid, tolerance);
+
+                if (updatedTolerance == null)
+                {
+                    Log.Warning("UpdateTolerance: Tolerance with uid {ToleranceUid} not found", toleranceUid);
+                    return NotFound(new ProblemDetails { Title = "Tolérance introuvable", Detail = $"Aucune tolérance avec l'uid {toleranceUid} n'a été trouvée." });
+                }
+
+                Log.Information("UpdateTolerance successfully updated tolerance uid: {ToleranceUid}", toleranceUid);
+                return Ok(updatedTolerance);
+            }
+            catch (InvalidOperationException ex)
+            {
+                Log.Error(ex, "UpdateTolerance failed with InvalidOperationException");
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "UpdateTolerance failed with exception");
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+         
+        [SwaggerOperation(
+            Summary = "Récupère toutes les tolérances actives",
+            Description = "Ce endpoint retourne toutes les tolérances dont la date du jour est comprise entre StartDate et EndDate.",
+            OperationId = "GetActiveTolerances"
+        )]
+        [HttpGet("active")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ICollection<Tolerance>))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ICollection<Tolerance>>> GetActiveTolerances()
+        {
+            try
+            {
+                Log.Information("GetActiveTolerances called");
+                var tolerances = await _toleranceRepository.GetActiveTolerances();
+                if (tolerances == null || !tolerances.Any())
+                {
+                    Log.Information("GetActiveTolerances returned no content");
+                    return NoContent();
+                }
+                Log.Information("GetActiveTolerances successfully returned {Count} active tolerances", tolerances.Count);
+                return Ok(tolerances);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Exception occurred while processing GetActiveTolerances");
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
     }
 }
