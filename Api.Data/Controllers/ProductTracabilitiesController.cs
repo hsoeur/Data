@@ -224,15 +224,15 @@ namespace Api.Data.Controllers
 
         [SwaggerOperation(
             Summary = "Récupère la dernière traçabilité pour un OF et une opération donnés",
-            Description = "Ce endpoint retourne la dernière traçabilité associée à un OF et une opération spécifiques.",
+            Description = "Ce endpoint retourne les dernières traçabilités associées à un OF et une opération spécifiques, regroupées par numéro de série.",
             OperationId = "GetCollectionProductTraceabilityByManufacturingOrderUidByOperationUidLatestOne"
         )]
         [HttpGet("latest-by-manufacturing-order-and-operation")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ProductTraceability))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ICollection<ProductTraceability>))]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ProductTraceability>> GetCollectionProductTraceabilityByManufacturingOrderUidByOperationUidLatestOne([FromQuery] string manufacturingOrderUid, [FromQuery] string operationUid)
+        public async Task<ActionResult<ICollection<ProductTraceability>>> GetCollectionProductTraceabilityByManufacturingOrderUidByOperationUidLatestOne([FromQuery] string manufacturingOrderUid, [FromQuery] string operationUid)
         {
             if (string.IsNullOrWhiteSpace(manufacturingOrderUid) || string.IsNullOrWhiteSpace(operationUid))
             {
@@ -242,13 +242,13 @@ namespace Api.Data.Controllers
             try
             {
                 Log.Information("GetCollectionProductTraceabilityByManufacturingOrderUidByOperationUidLatestOne called with manufacturingOrderUid: {ManufacturingOrderUid}, operationUid: {OperationUid}", manufacturingOrderUid, operationUid);
-                var traceability = await _tracabiliteProduitRepository.GetCollectionProductTraceabilityByManufacturingOrderUidByOperationLatestOne(manufacturingOrderUid, operationUid);
-                if (traceability == null)
+                var traceabilityList = await _tracabiliteProduitRepository.GetCollectionProductTraceabilityByManufacturingOrderUidByOperationLatestOne(manufacturingOrderUid, operationUid);
+                if (traceabilityList == null || traceabilityList.Count == 0)
                 {
                     Log.Information("No product traceability records found for manufacturingOrderUid: {ManufacturingOrderUid}, operationUid: {OperationUid}", manufacturingOrderUid, operationUid);
-                    return NotFound("No product traceability records found.");
+                    return NoContent();
                 }
-                return Ok(traceability);
+                return Ok(traceabilityList);
             }
             catch (Exception ex)
             {
