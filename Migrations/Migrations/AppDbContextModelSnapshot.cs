@@ -536,64 +536,6 @@ namespace Migrations.Migrations
                     b.ToTable("ManufacturingOrderNotifications");
                 });
 
-            modelBuilder.Entity("DataLib.MeasurementTraceability", b =>
-                {
-                    b.Property<string>("MeasurementTraceabilityUid")
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("Classification")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<DateTimeOffset>("CreationDate")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Label")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("MachineUid")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<int?>("ManufacturingOrderUid")
-                        .HasColumnType("int");
-
-                    b.Property<int>("OperationNumber")
-                        .HasColumnType("int");
-
-                    b.Property<string>("ProductUid")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<int>("SerialNumber")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UnitUid")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("UserUid")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("MeasurementTraceabilityUid");
-
-                    b.HasIndex("MachineUid");
-
-                    b.HasIndex("ManufacturingOrderUid");
-
-                    b.HasIndex("ProductUid");
-
-                    b.HasIndex("UserUid");
-
-                    b.ToTable("MeasurementTraceabilities");
-                });
-
             modelBuilder.Entity("DataLib.Operation", b =>
                 {
                     b.Property<string>("OperationUid")
@@ -972,39 +914,6 @@ namespace Migrations.Migrations
                     b.Navigation("Article");
 
                     b.Navigation("LabelType");
-                });
-
-            modelBuilder.Entity("DataLib.MeasurementTraceability", b =>
-                {
-                    b.HasOne("DataLib.Machine", "Machine")
-                        .WithMany()
-                        .HasForeignKey("MachineUid")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("DataLib.ManufacturingOrder", "ManufacturingOrder")
-                        .WithMany()
-                        .HasForeignKey("ManufacturingOrderUid");
-
-                    b.HasOne("DataLib.Article", "Article")
-                        .WithMany()
-                        .HasForeignKey("ProductUid")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("DataLib.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserUid")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Article");
-
-                    b.Navigation("Machine");
-
-                    b.Navigation("ManufacturingOrder");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("DataLib.ProductTraceability", b =>

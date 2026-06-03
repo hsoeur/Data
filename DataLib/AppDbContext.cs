@@ -22,7 +22,6 @@ namespace DataLib
         public DbSet<Machine> Machines { get; set; }
         public DbSet<Operation> Operations { get; set; }
         public DbSet<Sequence> Sequences { get; set; }
-        public DbSet<MeasurementTraceability> MeasurementTraceabilities { get; set; }
         public DbSet<ProductTraceability> ProductTraceabilities { get; set; }
         public DbSet<ProductStatus> ProductStatuses { get; set; }
         public DbSet<LabelType> LabelTypes { get; set; }

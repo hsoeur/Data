@@ -23,7 +23,7 @@ namespace DataLib
         /// </summary>
         [Required]
         [StringLength(50)]
-        [SwaggerSchema(Description = "Numéro de série de l'équipement (EquipSN). Doit être unique. Exemple: 00634A")]
+        [SwaggerSchema(Description = "Numéro de série de l'équipement (EquipSN). Doit être unique. Exemple: 0634A")]
         public string EquipSN { get; set; } = string.Empty;
 
         /// <summary>
