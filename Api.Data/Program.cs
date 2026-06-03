@@ -14,7 +14,6 @@ using Api.Data.Repositories.MacAddressRepo;
 using Api.Data.Repositories.MachineRepo;
 using Api.Data.Repositories.ManufacturingOrderNotificationRepo;
 using Api.Data.Repositories.ManufacturingOrderRepo;
-using Api.Data.Repositories.MeasurementTraceabilityRepo;
 using Api.Data.Repositories.OperationRepo;
 using Api.Data.Repositories.OrderLineRepo;
 using Api.Data.Repositories.ProductTraceabilityRepo;
@@ -143,7 +142,7 @@ builder.Services.AddScoped<IDatabaseNotificationRepository, DatabaseNotification
 builder.Services.AddScoped<ILabelRepository, LabelRepository>();
 builder.Services.AddScoped<IKitTraceabilityRepository, KitTraceabilityRepository>();
 builder.Services.AddScoped<IKitAccTraceabilityRepository, KitAccTraceabilityRepository>();
-builder.Services.AddScoped<IMeasurementTraceabilityRepository, MeasurementTraceabilityRepository>();
+
 builder.Services.AddScoped<IMacAddressRepository, MacAddressRepository>();
 builder.Services.AddScoped<IDeviceIdentityRepository, DeviceIdentityRepository>();
 builder.Services.AddScoped<IToleranceRepository, ToleranceRepository>();
@@ -167,7 +166,7 @@ app.Lifetime.ApplicationStarted.Register(() =>
         var server = app.Services.GetRequiredService<IServer>();
         var addresses = server.Features.Get<IServerAddressesFeature>()?.Addresses;
         var url = addresses?.FirstOrDefault() ?? "http://localhost:5000";
-     var target = $"{url.TrimEnd('/')}/"; // Swagger UI is served at root
+        var target = $"{url.TrimEnd('/')}/"; // Swagger UI is served at root
         Log.Information("Opening browser to Swagger UI at {Url}", target);
         Process.Start(new ProcessStartInfo { FileName = target, UseShellExecute = true });
     }

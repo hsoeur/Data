@@ -1,17 +1,16 @@
+using System.ComponentModel.DataAnnotations;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace DataLib
 {
-    [SwaggerSchema(Description = "Unité de mesure (ex : °C, V, Ohm).")]
-    public static class Unit
+    [SwaggerSchema(Description = "Unite de mesure utilisee par les tolerances et les mesures de production.")]
+    public class Unit
     {
-        public const string Unknown = "Unknown";
-        public const string Volt = "Volt";
-        public const string Ampere = "Ampere";
-        public const string Ohm = "Ohm";
-        public const string Celsius = "Celsius";
-        public const string Percent = "Percent";
-        public const string Second = "Second";
-        public const string Hertz = "Hertz";
+        [Key]
+        [SwaggerSchema(Description = "Identifiant unique de l'unite (ex: Volt, Celsius, Ohm, Unknown).")]
+        public string UnitUid { get; set; } = string.Empty;
+
+        [SwaggerSchema(Description = "Libelle lisible de l'unite de mesure.")]
+        public string Label { get; set; } = string.Empty;
     }
 }

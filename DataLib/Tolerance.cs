@@ -5,58 +5,59 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace DataLib
 {
     /// <summary>
-    /// Représente une tolérance de mesure dans la table `tolerance` de la base de production.
-    /// Définie pour un produit, une opération, et une machine donnée.
-    /// Utilisé par les services : Editeur et séquenceur de test.
+    /// Represente une tolerance de mesure dans la table `Tolerances`.
+    /// Definie pour un produit, une operation et une machine donnee.
     /// </summary>
-    [SwaggerSchema(Description = "Tolérance définie pour un produit, une opération et une machine. Encadre les valeurs acceptables pour les mesures de production.")]
+    [SwaggerSchema(Description = "Tolerance definie pour un produit, une operation et une machine. Encadre les valeurs acceptables pour les mesures de production.")]
     public class Tolerance
     {
         [Key]
-        [SwaggerSchema(Description = "Identifiant unique de la tolérance (clé primaire).")]
+        [SwaggerSchema(Description = "Identifiant unique de la tolerance (cle primaire).")]
         public required string ToleranceUid { get; set; }
 
-        [SwaggerSchema(Description = "Identifiant du produit concerné par la tolérance.")]
+        [SwaggerSchema(Description = "Identifiant du produit concerne par la tolerance.")]
         [ForeignKey(nameof(Article))]
         public required string ProductUid { get; set; }
         public Article? Article { get; set; }
 
-        [SwaggerSchema(Description = "Nom ou libellé de la caractéristique mesurée (ex : Tension, Température, etc.).")]
+        [SwaggerSchema(Description = "Nom ou libelle de la caracteristique mesuree (ex : Tension, Temperature, etc.).")]
         public required string Label { get; set; }
 
-        [SwaggerSchema(Description = "Valeur minimale ou seuil bas de la tolérance.")]
+        [SwaggerSchema(Description = "Valeur minimale ou seuil bas de la tolerance.")]
         public required string Val1 { get; set; }
 
-        [SwaggerSchema(Description = "Valeur maximale ou seuil haut de la tolérance.")]
+        [SwaggerSchema(Description = "Valeur maximale ou seuil haut de la tolerance.")]
         public required string Val2 { get; set; }
 
-        [SwaggerSchema(Description = "Date de début de validité de la tolérance.")]
+        [SwaggerSchema(Description = "Date de debut de validite de la tolerance.")]
         public required DateTimeOffset StartDate { get; set; }
 
-        [SwaggerSchema(Description = "Date de fin de validité de la tolérance.")]
+        [SwaggerSchema(Description = "Date de fin de validite de la tolerance.")]
         public required DateTimeOffset EndDate { get; set; }
 
-        [SwaggerSchema(Description = "Numéro d’opération dans la gamme de fabrication.")]
+        [SwaggerSchema(Description = "Numero d'operation dans la gamme de fabrication.")]
         public required int OperationNumber { get; set; }
 
-        [SwaggerSchema(Description = "Identifiant de l’utilisateur ayant défini ou modifié la tolérance.")]
+        [SwaggerSchema(Description = "Identifiant de l'utilisateur ayant defini ou modifie la tolerance.")]
         public required string UserUid { get; set; } = string.Empty;
 
         [ForeignKey(nameof(UserUid))]
-        [SwaggerSchema(Description = "Objet représentant l’utilisateur associé à la tolérance.")]
+        [SwaggerSchema(Description = "Objet representant l'utilisateur associe a la tolerance.")]
         public User? User { get; set; }
 
-        [SwaggerSchema(Description = "Identifiant de la machine concernée.")]
+        [SwaggerSchema(Description = "Identifiant de la machine concernee.")]
         public required string MachineUid { get; set; } = string.Empty;
 
         [ForeignKey(nameof(MachineUid))]
-        [SwaggerSchema(Description = "Objet représentant la machine sur laquelle s’applique la tolérance.")]
+        [SwaggerSchema(Description = "Objet representant la machine sur laquelle s'applique la tolerance.")]
         public Machine? Machine { get; set; }
 
-        [SwaggerSchema(Description = "Mode de mesure concerné.")]
+        [SwaggerSchema(Description = "Mode de mesure concerne.")]
         public required string Mode { get; set; }
 
-        [SwaggerSchema(Description = "Unité utilisée pour la mesure.")]
-        public required string Unit { get; set; }
+        [SwaggerSchema(Description = "Identifiant de l'unite utilisee pour la mesure.")]
+        [ForeignKey(nameof(Unit))]
+        public required string UnitUid { get; set; }
+        public Unit? Unit { get; set; }
     }
 }

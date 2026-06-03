@@ -788,9 +788,9 @@ namespace Migrations.Migrations
                     b.Property<DateTimeOffset>("StartDate")
                         .HasColumnType("datetime(6)");
 
-                    b.Property<string>("Unit")
+                    b.Property<string>("UnitUid")
                         .IsRequired()
-                        .HasColumnType("longtext");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<string>("UserUid")
                         .IsRequired()
@@ -810,9 +810,25 @@ namespace Migrations.Migrations
 
                     b.HasIndex("ProductUid");
 
+                    b.HasIndex("UnitUid");
+
                     b.HasIndex("UserUid");
 
                     b.ToTable("Tolerances");
+                });
+
+            modelBuilder.Entity("DataLib.Unit", b =>
+                {
+                    b.Property<string>("UnitUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("UnitUid");
+
+                    b.ToTable("Units");
                 });
 
             modelBuilder.Entity("DataLib.User", b =>
@@ -987,6 +1003,12 @@ namespace Migrations.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("DataLib.Unit", "Unit")
+                        .WithMany()
+                        .HasForeignKey("UnitUid")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.HasOne("DataLib.User", "User")
                         .WithMany()
                         .HasForeignKey("UserUid")
@@ -996,6 +1018,8 @@ namespace Migrations.Migrations
                     b.Navigation("Article");
 
                     b.Navigation("Machine");
+
+                    b.Navigation("Unit");
 
                     b.Navigation("User");
                 });

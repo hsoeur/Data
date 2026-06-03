@@ -136,7 +136,7 @@ namespace Api.Data.Repositories.ToleranceRepo
                     OperationNumber = tolerance.OperationNumber,
                     Label = tolerance.Label,
                     MachineUid = tolerance.MachineUid,
-                    Unit = tolerance.Unit,
+                    UnitUid = tolerance.UnitUid,
                     Val1 = tolerance.Val1,
                     Val2 = tolerance.Val2,
                     Mode = tolerance.Mode,

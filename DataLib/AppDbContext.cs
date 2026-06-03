@@ -24,6 +24,7 @@ namespace DataLib
         public DbSet<Sequence> Sequences { get; set; }
         public DbSet<ProductTraceability> ProductTraceabilities { get; set; }
         public DbSet<ProductStatus> ProductStatuses { get; set; }
+        public DbSet<Unit> Units { get; set; }
         public DbSet<LabelType> LabelTypes { get; set; }
         public DbSet<Tolerance> Tolerances { get; set; }
         public DbSet<LabelTemplate> LabelTemplates { get; set; }
