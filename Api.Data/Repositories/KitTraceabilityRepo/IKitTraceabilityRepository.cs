@@ -5,7 +5,7 @@ namespace Api.Data.Repositories.KitTraceabilityRepo
     public interface IKitTraceabilityRepository
     {
         Task CreateKit(KitTraceability kit);
-        Task<bool> AlreadyProcessed(int uidOf);
-        Task<KitTraceability?> GetKitByProductUidAndSerialNumber(string productUid, int serialNumber);
+        Task<bool> AlreadyProcessed(int ManufacturingOrderUid);
+        Task<KitTraceability?> GetKitByProductAndSerialNumber(string Product, int SerialNumber);
     }
 }

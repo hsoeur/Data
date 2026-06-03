@@ -13,34 +13,34 @@ namespace Api.Data.Repositories.KitTraceabilityRepo
             _context = context;
         }
 
-        public async Task<bool> AlreadyProcessed(int uidOf)
+        public async Task<bool> AlreadyProcessed(int ManufacturingOrderUid)
         {
-            Log.Information("AlreadyProcessed called with uidOf: {UidOf}", uidOf);
+            Log.Information("AlreadyProcessed called with ManufacturingOrderUid: {ManufacturingOrderUid}", ManufacturingOrderUid);
 
             try
             {
-                var ordreFabrication = await _context.ManufacturingOrders
-                    .Where(of => of.ManufacturingOrderUid == uidOf)
+                var manufacturingOrder = await _context.ManufacturingOrders
+                    .Where(of => of.ManufacturingOrderUid == ManufacturingOrderUid)
                     .FirstOrDefaultAsync();
 
-                if (ordreFabrication == null)
+                if (manufacturingOrder == null)
                 {
-                    Log.Warning("No OrdreFabrication found with uidOf: {UidOf}", uidOf);
+                    Log.Warning("No ManufacturingOrder found with ManufacturingOrderUid: {ManufacturingOrderUid}", ManufacturingOrderUid);
                     return false;
                 }
 
                 bool exists = await _context.KitTraceabilities
-                    .AnyAsync(kit => kit.ClientOrder == ordreFabrication.ExternalOrderNumber
-                                     && kit.ManufacturingOrderUid == ordreFabrication.ManufacturingOrderUid
-                                     && kit.Product == ordreFabrication.ProductUid);
+                    .AnyAsync(kit => kit.ClientOrder == manufacturingOrder.ExternalOrderNumber
+                                     && kit.ManufacturingOrderUid == manufacturingOrder.ManufacturingOrderUid
+                                     && kit.Product == manufacturingOrder.ProductUid);
 
-                Log.Information("AlreadyProcessed result for uidOf: {UidOf} is {Exists}", uidOf, exists);
+                Log.Information("AlreadyProcessed result for ManufacturingOrderUid: {ManufacturingOrderUid} is {Exists}", ManufacturingOrderUid, exists);
 
                 return exists;
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Failed to determine if kit has already been processed for uidOf: {UidOf}", uidOf);
+                Log.Error(ex, "Failed to determine if kit has already been processed for ManufacturingOrderUid: {ManufacturingOrderUid}", ManufacturingOrderUid);
                 throw; // Rethrow the exception to be handled upstream
             }
         }
@@ -63,19 +63,19 @@ namespace Api.Data.Repositories.KitTraceabilityRepo
             }
         }
 
-        public async Task<KitTraceability?> GetKitByProductUidAndSerialNumber(string productUid, int serialNumber)
+        public async Task<KitTraceability?> GetKitByProductAndSerialNumber(string Product, int SerialNumber)
         {
-            Log.Information("GetKitByManufacturingOrderAndSerialNumber called with manufacturingOrderUid: {ManufacturingOrderUid}, serialNumber: {SerialNumber}", productUid, serialNumber);
+            Log.Information("GetKitByProductAndSerialNumber called with Product: {Product}, SerialNumber: {SerialNumber}", Product, SerialNumber);
 
             try
             {
                 var kit = await _context.KitTraceabilities
-                    .Where(k => k.Product == productUid && k.SerialNumber == serialNumber)
+                    .Where(k => k.Product == Product && k.SerialNumber == SerialNumber)
                     .FirstOrDefaultAsync();
 
                 if (kit == null)
                 {
-                    Log.Information("No Kit found with manufacturingOrderUid: {ManufacturingOrderUid} and serialNumber: {SerialNumber}", productUid, serialNumber);
+                    Log.Information("No Kit found with Product: {Product} and SerialNumber: {SerialNumber}", Product, SerialNumber);
                 }
                 else
                 {
@@ -86,7 +86,7 @@ namespace Api.Data.Repositories.KitTraceabilityRepo
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Failed to get kit with manufacturingOrderUid: {ManufacturingOrderUid} and serialNumber: {SerialNumber}", productUid, serialNumber);
+                Log.Error(ex, "Failed to get kit with Product: {Product} and SerialNumber: {SerialNumber}", Product, SerialNumber);
                 throw;
             }
         }
