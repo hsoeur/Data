@@ -23,6 +23,7 @@ namespace DataLib
         public DbSet<Operation> Operations { get; set; }
         public DbSet<Sequence> Sequences { get; set; }
         public DbSet<ProductTraceability> ProductTraceabilities { get; set; }
+        public DbSet<MeasurementTraceability> MeasurementTraceabilities { get; set; }
         public DbSet<ProductStatus> ProductStatuses { get; set; }
         public DbSet<Unit> Units { get; set; }
         public DbSet<LabelType> LabelTypes { get; set; }
@@ -52,6 +53,15 @@ namespace DataLib
             modelBuilder.Entity<DeviceIdentity>()
                 .HasIndex(d => d.MacAddressValue)
                 .IsUnique();
+
+            modelBuilder.Entity<MeasurementTraceability>()
+                .HasIndex(m => new { m.ProductTraceabilityUid, m.ToleranceUid });
+
+            modelBuilder.Entity<MeasurementTraceability>()
+                .HasIndex(m => new { m.ToleranceUid, m.Classification });
+
+            modelBuilder.Entity<MeasurementTraceability>()
+                .HasIndex(m => new { m.ProductTraceabilityUid, m.Classification });
 
             // Disable cascade delete globally to avoid unintended deletions during GenDb updates
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())

@@ -56,7 +56,7 @@ namespace Migrations.Migrations
 
                     b.HasKey("ArticleUid");
 
-                    b.ToTable("Articles");
+                    b.ToTable("Articles", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.BillOfMaterial", b =>
@@ -92,7 +92,7 @@ namespace Migrations.Migrations
 
                     b.HasKey("BillOfMaterialsUid");
 
-                    b.ToTable("BillOfMaterials");
+                    b.ToTable("BillOfMaterials", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.DatabaseNotification", b =>
@@ -144,7 +144,7 @@ namespace Migrations.Migrations
 
                     b.HasKey("DatabaseNotificationUid");
 
-                    b.ToTable("DatabaseNotifications");
+                    b.ToTable("DatabaseNotifications", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.DeviceIdentity", b =>
@@ -176,7 +176,7 @@ namespace Migrations.Migrations
                     b.HasIndex("MacAddressValue")
                         .IsUnique();
 
-                    b.ToTable("DeviceIdentities");
+                    b.ToTable("DeviceIdentities", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.Firmware", b =>
@@ -219,7 +219,7 @@ namespace Migrations.Migrations
 
                     b.HasIndex("UserUid");
 
-                    b.ToTable("Firmwares");
+                    b.ToTable("Firmwares", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.FirmwareVersion", b =>
@@ -237,7 +237,7 @@ namespace Migrations.Migrations
 
                     b.HasKey("FirmwareVersionUid");
 
-                    b.ToTable("FirmwareVersions");
+                    b.ToTable("FirmwareVersions", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.KitAccTraceability", b =>
@@ -273,7 +273,7 @@ namespace Migrations.Migrations
 
                     b.HasKey("KitAccTraceabilityUid");
 
-                    b.ToTable("KitAccTraceabilities");
+                    b.ToTable("KitAccTraceabilities", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.KitTraceability", b =>
@@ -312,7 +312,7 @@ namespace Migrations.Migrations
 
                     b.HasKey("KitTraceabilityUid");
 
-                    b.ToTable("KitTraceabilities");
+                    b.ToTable("KitTraceabilities", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.Label", b =>
@@ -363,7 +363,7 @@ namespace Migrations.Migrations
 
                     b.HasIndex("UserUid");
 
-                    b.ToTable("Labels");
+                    b.ToTable("Labels", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.LabelTemplate", b =>
@@ -403,7 +403,7 @@ namespace Migrations.Migrations
 
                     b.HasIndex("Product");
 
-                    b.ToTable("LabelTemplates");
+                    b.ToTable("LabelTemplates", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.LabelType", b =>
@@ -413,7 +413,7 @@ namespace Migrations.Migrations
 
                     b.HasKey("LabelTypeUid");
 
-                    b.ToTable("LabelTypes");
+                    b.ToTable("LabelTypes", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.MacAddress", b =>
@@ -444,7 +444,7 @@ namespace Migrations.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("MacAddresses");
+                    b.ToTable("MacAddresses", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.Machine", b =>
@@ -458,7 +458,7 @@ namespace Migrations.Migrations
 
                     b.HasKey("MachineUid");
 
-                    b.ToTable("Machines");
+                    b.ToTable("Machines", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.ManufacturingOrder", b =>
@@ -496,7 +496,7 @@ namespace Migrations.Migrations
 
                     b.HasKey("ManufacturingOrderUid");
 
-                    b.ToTable("ManufacturingOrders");
+                    b.ToTable("ManufacturingOrders", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.ManufacturingOrderNotification", b =>
@@ -533,7 +533,41 @@ namespace Migrations.Migrations
 
                     b.HasKey("NotificationUid");
 
-                    b.ToTable("ManufacturingOrderNotifications");
+                    b.ToTable("ManufacturingOrderNotifications", (string)null);
+                });
+
+            modelBuilder.Entity("DataLib.MeasurementTraceability", b =>
+                {
+                    b.Property<string>("MeasurementTraceabilityUid")
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Classification")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("varchar(32)");
+
+                    b.Property<string>("ProductTraceabilityUid")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("ToleranceUid")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("varchar(128)");
+
+                    b.HasKey("MeasurementTraceabilityUid");
+
+                    b.HasIndex("ProductTraceabilityUid", "Classification");
+
+                    b.HasIndex("ProductTraceabilityUid", "ToleranceUid");
+
+                    b.HasIndex("ToleranceUid", "Classification");
+
+                    b.ToTable("MeasurementTraceabilities", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.Operation", b =>
@@ -569,7 +603,7 @@ namespace Migrations.Migrations
 
                     b.HasKey("OperationUid");
 
-                    b.ToTable("Operations");
+                    b.ToTable("Operations", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.OrderLine", b =>
@@ -586,7 +620,7 @@ namespace Migrations.Migrations
 
                     b.HasKey("UidOrderLine");
 
-                    b.ToTable("OrderLines");
+                    b.ToTable("OrderLines", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.PackagingLocationPhoto", b =>
@@ -608,7 +642,7 @@ namespace Migrations.Migrations
 
                     b.HasKey("PackagingLocationPhotoUid");
 
-                    b.ToTable("PackagingLocationPhotos");
+                    b.ToTable("PackagingLocationPhotos", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.ProductStatus", b =>
@@ -618,7 +652,7 @@ namespace Migrations.Migrations
 
                     b.HasKey("ProductStatusUid");
 
-                    b.ToTable("ProductStatuses");
+                    b.ToTable("ProductStatuses", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.ProductTraceability", b =>
@@ -666,7 +700,7 @@ namespace Migrations.Migrations
 
                     b.HasIndex("UserUid");
 
-                    b.ToTable("ProductTraceabilities");
+                    b.ToTable("ProductTraceabilities", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.Sequence", b =>
@@ -695,7 +729,7 @@ namespace Migrations.Migrations
 
                     b.HasIndex("Product");
 
-                    b.ToTable("Sequences");
+                    b.ToTable("Sequences", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.SimCard", b =>
@@ -720,7 +754,7 @@ namespace Migrations.Migrations
 
                     b.HasKey("SimCardUid");
 
-                    b.ToTable("SimCards");
+                    b.ToTable("SimCards", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.SolderingProgram", b =>
@@ -755,7 +789,7 @@ namespace Migrations.Migrations
 
                     b.HasIndex("UserUid");
 
-                    b.ToTable("SolderingPrograms");
+                    b.ToTable("SolderingPrograms", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.Tolerance", b =>
@@ -814,7 +848,7 @@ namespace Migrations.Migrations
 
                     b.HasIndex("UserUid");
 
-                    b.ToTable("Tolerances");
+                    b.ToTable("Tolerances", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.Unit", b =>
@@ -828,7 +862,7 @@ namespace Migrations.Migrations
 
                     b.HasKey("UnitUid");
 
-                    b.ToTable("Units");
+                    b.ToTable("Units", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.User", b =>
@@ -856,7 +890,7 @@ namespace Migrations.Migrations
 
                     b.HasKey("UserUid");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("DataLib.Firmware", b =>
@@ -930,6 +964,25 @@ namespace Migrations.Migrations
                     b.Navigation("Article");
 
                     b.Navigation("LabelType");
+                });
+
+            modelBuilder.Entity("DataLib.MeasurementTraceability", b =>
+                {
+                    b.HasOne("DataLib.ProductTraceability", "ProductTraceability")
+                        .WithMany()
+                        .HasForeignKey("ProductTraceabilityUid")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("DataLib.Tolerance", "Tolerance")
+                        .WithMany()
+                        .HasForeignKey("ToleranceUid")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ProductTraceability");
+
+                    b.Navigation("Tolerance");
                 });
 
             modelBuilder.Entity("DataLib.ProductTraceability", b =>
