@@ -1,5 +1,6 @@
 using DataLib;
 using Swashbuckle.AspNetCore.Annotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace Api.Data.Dtos
 {
@@ -9,6 +10,7 @@ namespace Api.Data.Dtos
         public required int OperationNumber { get; set; }
         public required string MachineUid { get; set; }
         public required string Label { get; set; }
+        [ValidMode]
         public required string Mode { get; set; }
         public required string Val1 { get; set; }
         public required string Val2 { get; set; }

@@ -60,6 +60,11 @@ namespace Api.Data.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<Tolerance>> CreateTolerance([FromBody] ToleranceDto request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             if (request == null)
             {
                 return BadRequest(new ProblemDetails { Title = "Paramètre invalide", Detail = "Le corps de la requête est requis." });
@@ -152,6 +157,11 @@ namespace Api.Data.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<Tolerance>> UpdateTolerance([FromRoute] string toleranceUid, [FromBody] ToleranceDto request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             if (string.IsNullOrWhiteSpace(toleranceUid))
             {
                 return BadRequest(new ProblemDetails { Title = "Paramètre invalide", Detail = "Le paramètre 'toleranceUid' est requis." });
