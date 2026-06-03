@@ -221,7 +221,7 @@ namespace Api.Data.Repositories.ProductTraceabilityRepo
                 productTraceabilities = rawData
                     .GroupBy(p => new { p.ManufacturingOrderUid, p.ProductSerialNumber })
                     .Select(g => g.OrderByDescending(p => p.CreationDate)
-                                   .FirstOrDefault())
+                                   .First())
                     .ToList();
 
                 Log.Information("Nombre d'enregistrements trouvés : {Count}", productTraceabilities.Count);
