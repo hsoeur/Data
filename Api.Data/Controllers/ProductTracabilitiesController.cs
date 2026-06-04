@@ -50,6 +50,7 @@ namespace Api.Data.Controllers
                 ProductSerialNumber = tracabiliteProduitDto.ProductSerialNumber,
                 OperationNumber = tracabiliteProduitDto.OperationNumber,
                 ProductStatusUid = tracabiliteProduitDto.ProductStatusUid,
+                FailureComment = tracabiliteProduitDto.FailureComment,
                 CreationDate = tracabiliteProduitDto.CreationDate,
                 ManufacturingOrderUid = tracabiliteProduitDto.ManufacturingOrderUid,
                 UserUid = tracabiliteProduitDto.UserUid,

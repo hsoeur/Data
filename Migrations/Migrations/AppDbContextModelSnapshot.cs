@@ -667,6 +667,9 @@ namespace Migrations.Migrations
                         .HasPrecision(10, 2)
                         .HasColumnType("decimal(10,2)");
 
+                    b.Property<string>("FailureComment")
+                        .HasColumnType("longtext");
+
                     b.Property<string>("MachineUid")
                         .IsRequired()
                         .HasColumnType("varchar(255)");

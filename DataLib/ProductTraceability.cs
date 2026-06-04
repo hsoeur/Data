@@ -21,6 +21,9 @@ namespace DataLib
         [SwaggerSchema(Description = "Identifiant du statut associé à cette étape de production.")]
         public string ProductStatusUid { get; set; } = string.Empty;
 
+        [SwaggerSchema(Description = "Commentaire décrivant la panne lorsque le produit est NOK ou KO.")]
+        public string? FailureComment { get; set; }
+
         [ForeignKey(nameof(ProductStatusUid))]
         [SwaggerSchema(Description = "Objet représentant le statut du produit (clé étrangère).")]
         public ProductStatus? ProductStatus { get; set; }

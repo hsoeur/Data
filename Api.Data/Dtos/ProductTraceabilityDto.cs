@@ -5,6 +5,7 @@
         public string ProductUid { get; set; } = string.Empty;
         public int ProductSerialNumber { get; set; } 
         public string ProductStatusUid { get; set; } = string.Empty;
+        public string? FailureComment { get; set; }
         public DateTimeOffset CreationDate { get; set; } 
         public int ManufacturingOrderUid { get; set; }
         public string UserUid { get; set; } = string.Empty;
