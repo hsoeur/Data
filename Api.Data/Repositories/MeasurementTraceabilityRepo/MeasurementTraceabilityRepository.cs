@@ -18,6 +18,8 @@ namespace Api.Data.Repositories.MeasurementTraceabilityRepo
         {
             try
             {
+                await ValidateProductUidConsistency(measurementTraceability);
+
                 _context.MeasurementTraceabilities.Add(measurementTraceability);
                 await _context.SaveChangesAsync();
                 return measurementTraceability;
@@ -40,6 +42,11 @@ namespace Api.Data.Repositories.MeasurementTraceabilityRepo
 
                 try
                 {
+                    foreach (var item in items)
+                    {
+                        await ValidateProductUidConsistency(item);
+                    }
+
                     _context.MeasurementTraceabilities.AddRange(items);
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
@@ -66,6 +73,8 @@ namespace Api.Data.Repositories.MeasurementTraceabilityRepo
 
                 try
                 {
+                    await ValidateProductUidConsistency(item);
+
                     _context.MeasurementTraceabilities.Add(item);
                     await _context.SaveChangesAsync();
                     result.Created.Add(item);
@@ -91,6 +100,37 @@ namespace Api.Data.Repositories.MeasurementTraceabilityRepo
             }
 
             return result;
+        }
+
+        private async Task ValidateProductUidConsistency(MeasurementTraceability measurementTraceability)
+        {
+            var productTraceability = await _context.ProductTraceabilities
+                .AsNoTracking()
+                .Where(p => p.ProductTraceabilityUid == measurementTraceability.ProductTraceabilityUid)
+                .Select(p => new { p.ProductUid })
+                .SingleOrDefaultAsync();
+
+            if (productTraceability == null)
+            {
+                throw new ArgumentException($"ProductTraceability '{measurementTraceability.ProductTraceabilityUid}' introuvable.");
+            }
+
+            var tolerance = await _context.Tolerances
+                .AsNoTracking()
+                .Where(t => t.ToleranceUid == measurementTraceability.ToleranceUid)
+                .Select(t => new { t.ProductUid })
+                .SingleOrDefaultAsync();
+
+            if (tolerance == null)
+            {
+                throw new ArgumentException($"Tolerance '{measurementTraceability.ToleranceUid}' introuvable.");
+            }
+
+            if (!string.Equals(productTraceability.ProductUid, tolerance.ProductUid, StringComparison.Ordinal))
+            {
+                throw new ArgumentException(
+                    $"Le ProductUid de la tolerance ('{tolerance.ProductUid}') doit etre identique au ProductUid de la ProductTraceability ('{productTraceability.ProductUid}').");
+            }
         }
 
         public async Task<List<MeasurementTraceability>> GetCollectionByProductUidAndOperationNumber(string productUid, int operationNumber)

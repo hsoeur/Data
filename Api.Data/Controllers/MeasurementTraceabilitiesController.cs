@@ -38,6 +38,11 @@ namespace Api.Data.Controllers
                 Log.Information("CreateMeasurementTraceability successfully created with uid: {MeasurementTraceabilityUid}", created.MeasurementTraceabilityUid);
                 return Ok(created);
             }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Invalid measurement traceability coherence in CreateMeasurementTraceability");
+                return BadRequest(new ProblemDetails { Title = "Parametre invalide", Detail = ex.Message });
+            }
             catch (Exception ex)
             {
                 Log.Error(ex, "Exception occurred while processing CreateMeasurementTraceability");
@@ -63,6 +68,11 @@ namespace Api.Data.Controllers
                 var created = await _measurementTraceabilityRepository.CreateMeasurementTraceabilitiesAtomic(request.Select(MapToEntity));
                 Log.Information("CreateMeasurementTraceabilityBatchAtomic successfully created {Count} records", created.Count);
                 return Ok(created);
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Invalid measurement traceability coherence in CreateMeasurementTraceabilityBatchAtomic");
+                return BadRequest(new ProblemDetails { Title = "Parametre invalide", Detail = ex.Message });
             }
             catch (Exception ex)
             {
