@@ -7,13 +7,14 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Api.Data.Controllers
 {
     [Route("api/[controller]")]
+    [Route("api/Operation")]
     [ApiController]
     [Produces("application/json")]
-    public class OperationController : ControllerBase
+    public class OperationsController : ControllerBase
     {
         private readonly IOperationRepository _processRepository;
 
-        public OperationController(IOperationRepository processRepository)
+        public OperationsController(IOperationRepository processRepository)
         {
             _processRepository = processRepository;
         }

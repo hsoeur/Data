@@ -8,13 +8,14 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Api.Data.Controllers
 {
     [Route("api/[controller]")]
+    [Route("api/LabelTemplate")]
     [ApiController]
     [Produces("application/json")]
-    public class LabelTemplateController : ControllerBase
+    public class LabelTemplatesController : ControllerBase
     {
         private readonly ILabelTemplateRepository _repository;
 
-        public LabelTemplateController(ILabelTemplateRepository repository)
+        public LabelTemplatesController(ILabelTemplateRepository repository)
         {
             _repository = repository;
         }

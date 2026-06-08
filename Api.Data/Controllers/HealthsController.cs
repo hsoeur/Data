@@ -1,21 +1,22 @@
-ï»¿using DataLib;
+using DataLib;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Data.Controllers
 {
     [Route("api/[controller]/[action]")]
+    [Route("api/Health/[action]")]
     [ApiController]
-    public class HealthController : ControllerBase
+    public class HealthsController : ControllerBase
     {
         private readonly AppDbContext _dbContext;
 
-        public HealthController(AppDbContext dbContext)
+        public HealthsController(AppDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
         /// <summary>
-        /// VÃ©rifie que l'API est joignable (sans vÃ©rifier la base de donnÃ©es).
+        /// Vérifie que l'API est joignable (sans vérifier la base de données).
         /// </summary>
         [HttpGet]
         public IActionResult Live()
@@ -24,7 +25,7 @@ namespace Api.Data.Controllers
         }
 
         /// <summary>
-        /// VÃ©rifie que la base de donnÃ©es est accessible.
+        /// Vérifie que la base de données est accessible.
         /// </summary>
         [HttpGet]
         public async Task<IActionResult> Database(CancellationToken cancellationToken)
@@ -70,7 +71,7 @@ namespace Api.Data.Controllers
         }
 
         /// <summary>
-        /// Endpoint conservÃ© pour compatibilitÃ©.
+        /// Endpoint conservé pour compatibilité.
         /// </summary>
         [HttpGet]
         public IActionResult Get()

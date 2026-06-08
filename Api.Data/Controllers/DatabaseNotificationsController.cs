@@ -6,14 +6,15 @@ using Serilog;
 namespace Api.Data.Controllers
 {
     [Route("api/[controller]/[action]")]
+    [Route("api/DatabaseNotification/[action]")]
     [ApiController]
-    public class DatabaseNotificationController : ControllerBase
+    public class DatabaseNotificationsController : ControllerBase
     {
         private readonly IDatabaseNotificationRepository _repository;
 
-        public DatabaseNotificationController(
+        public DatabaseNotificationsController(
             IDatabaseNotificationRepository repository,
-            ILogger<DatabaseNotificationController> logger)
+            ILogger<DatabaseNotificationsController> logger)
         {
             _repository = repository;
         }

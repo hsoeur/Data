@@ -10,13 +10,14 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Api.Data.Controllers
 {
     [Route("api/[controller]")]
+    [Route("api/ManufacturingOrder")]
     [ApiController]
     [Produces("application/json")]
-    public class ManufacturingOrderController : ControllerBase
+    public class ManufacturingOrdersController : ControllerBase
     {
         private readonly IManufacturingOrderRepository _ordreFabricationRepository;
 
-        public ManufacturingOrderController(IManufacturingOrderRepository ordreFabricationRepository)
+        public ManufacturingOrdersController(IManufacturingOrderRepository ordreFabricationRepository)
         {
             _ordreFabricationRepository = ordreFabricationRepository;
         }

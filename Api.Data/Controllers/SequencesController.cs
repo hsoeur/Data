@@ -1,4 +1,4 @@
-ï»¿using Api.Data.Repositories.SequenceRepo;
+using Api.Data.Repositories.SequenceRepo;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using Swashbuckle.AspNetCore.Annotations;
@@ -7,20 +7,21 @@ using System.Text.Json;
 namespace Api.Data.Controllers
 {
     [Route("api/[controller]")]
+    [Route("api/Sequence")]
     [ApiController]
     [Produces("application/json")]
-    public class SequenceController : ControllerBase
+    public class SequencesController : ControllerBase
     {
         private readonly ISequenceRepository _sequenceRepository;
 
-        public SequenceController(ISequenceRepository sequenceRepository)
+        public SequencesController(ISequenceRepository sequenceRepository)
         {
             _sequenceRepository = sequenceRepository;
         }
 
         [SwaggerOperation(
-            Summary = "RÃ©cupÃ¨re la derniÃ¨re sÃ©quence valide par produit",
-            Description = "Retourne la derniÃ¨re sÃ©quence valide pour un produit et un numÃ©ro d'opÃ©ration donnÃ©s.",
+            Summary = "Récupère la dernière séquence valide par produit",
+            Description = "Retourne la dernière séquence valide pour un produit et un numéro d'opération donnés.",
             OperationId = "GetLatestSequenceByProduct"
         )]
         [HttpGet("latest-by-product")]
@@ -32,7 +33,7 @@ namespace Api.Data.Controllers
         {
             if (string.IsNullOrWhiteSpace(productUid))
             {
-                return BadRequest(new ProblemDetails { Title = "ParamÃ¨tre invalide", Detail = "Le paramÃ¨tre 'productUid' est requis." });
+                return BadRequest(new ProblemDetails { Title = "Paramètre invalide", Detail = "Le paramètre 'productUid' est requis." });
             }
 
             try
@@ -42,7 +43,7 @@ namespace Api.Data.Controllers
                 if (sequence == null)
                 {
                     Log.Information("No valid sequence found for productUid: {ProductUid}, operationNumber: {OperationNumber}", productUid, operationNumber);
-                    return NotFound($"Aucune sÃ©quence valide trouvÃ©e pour le produit {productUid}");
+                    return NotFound($"Aucune séquence valide trouvée pour le produit {productUid}");
                 }
                 return Ok(sequence);
             }
@@ -54,8 +55,8 @@ namespace Api.Data.Controllers
         }
 
         [SwaggerOperation(
-            Summary = "RÃ©cupÃ¨re le contenu JSON du fichier de la derniÃ¨re sÃ©quence valide",
-            Description = "Lit et retourne le contenu JSON du fichier liÃ© Ã  la derniÃ¨re sÃ©quence valide pour un produit et un numÃ©ro d'opÃ©ration donnÃ©s.",
+            Summary = "Récupère le contenu JSON du fichier de la dernière séquence valide",
+            Description = "Lit et retourne le contenu JSON du fichier lié à la dernière séquence valide pour un produit et un numéro d'opération donnés.",
             OperationId = "GetLatestSequenceFileContentByProduct"
         )]
         [HttpGet("latest-file-content-by-product")]
@@ -67,7 +68,7 @@ namespace Api.Data.Controllers
         {
             if (string.IsNullOrWhiteSpace(productUid))
             {
-                return BadRequest(new ProblemDetails { Title = "ParamÃ¨tre invalide", Detail = "Le paramÃ¨tre 'productUid' est requis." });
+                return BadRequest(new ProblemDetails { Title = "Paramètre invalide", Detail = "Le paramètre 'productUid' est requis." });
             }
 
             try
@@ -77,18 +78,18 @@ namespace Api.Data.Controllers
                 if (sequence == null)
                 {
                     Log.Information("No valid sequence found for productUid: {ProductUid}", productUid);
-                    return NotFound($"Aucune sÃ©quence valide trouvÃ©e pour le produit {productUid}");
+                    return NotFound($"Aucune séquence valide trouvée pour le produit {productUid}");
                 }
                 if (string.IsNullOrWhiteSpace(sequence.File))
                 {
                     Log.Information("Sequence file path is empty for sequence uid: {SequenceUid}", sequence.SequenceUid);
-                    return NotFound($"Fichier JSON introuvable pour la sÃ©quence {sequence.SequenceUid}");
+                    return NotFound($"Fichier JSON introuvable pour la séquence {sequence.SequenceUid}");
                 }
                 string file = "C:\\Sequences\\" + sequence.File;
                 if (!System.IO.File.Exists(file))
                 {
                     Log.Information("Sequence file does not exist at path: {File}", file);
-                    return NotFound($"Fichier JSON introuvable pour la sÃ©quence {sequence.SequenceUid}");
+                    return NotFound($"Fichier JSON introuvable pour la séquence {sequence.SequenceUid}");
                 }
                 var jsonContent = await System.IO.File.ReadAllTextAsync(file);
                 using var jsonDoc = JsonDocument.Parse(jsonContent);
@@ -96,7 +97,7 @@ namespace Api.Data.Controllers
             }
             catch (System.Exception ex)
             {
-                Log.Error(ex, "Erreur lors de la lecture ou du parsing du fichier de sÃ©quence");
+                Log.Error(ex, "Erreur lors de la lecture ou du parsing du fichier de séquence");
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }

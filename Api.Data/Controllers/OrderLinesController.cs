@@ -9,13 +9,14 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Api.Data.Controllers
 {
     [Route("api/[controller]")]
+    [Route("api/OrderLine")]
     [ApiController]
     [Produces("application/json")]
-    public class OrderLineController : ControllerBase
+    public class OrderLinesController : ControllerBase
     {
         private readonly IOrderLineRepository _orderLineRepository;
 
-        public OrderLineController(IOrderLineRepository orderLineRepository)
+        public OrderLinesController(IOrderLineRepository orderLineRepository)
         {
             _orderLineRepository = orderLineRepository;
         }

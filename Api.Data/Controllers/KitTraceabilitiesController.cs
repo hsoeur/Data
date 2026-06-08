@@ -8,13 +8,14 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Api.Data.Controllers
 {
     [Route("api/[controller]")]
+    [Route("api/KitTraceability")]
     [ApiController]
     [Produces("application/json")]
-    public class KitTraceabilityController : ControllerBase
+    public class KitTraceabilitiesController : ControllerBase
     {
         private readonly IKitTraceabilityRepository _kitRepository;
 
-        public KitTraceabilityController(IKitTraceabilityRepository kitRepository)
+        public KitTraceabilitiesController(IKitTraceabilityRepository kitRepository)
         {
             _kitRepository = kitRepository;
         }

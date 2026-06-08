@@ -8,13 +8,14 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Api.Data.Controllers
 {
     [Route("api/[controller]")]
+    [Route("api/SolderingProgram")]
     [ApiController]
     [Produces("application/json")]
-    public class SolderingProgramController : ControllerBase
+    public class SolderingProgramsController : ControllerBase
     {
         private readonly ISolderingProgramRepository _solderingProgramsRepository;
 
-        public SolderingProgramController(ISolderingProgramRepository solderingProgramsRepository)
+        public SolderingProgramsController(ISolderingProgramRepository solderingProgramsRepository)
         {
             _solderingProgramsRepository = solderingProgramsRepository;
         }
