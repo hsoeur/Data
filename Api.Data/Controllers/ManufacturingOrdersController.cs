@@ -10,7 +10,6 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Api.Data.Controllers
 {
     [Route("api/[controller]")]
-    [Route("api/ManufacturingOrder")]
     [ApiController]
     [Produces("application/json")]
     public class ManufacturingOrdersController : ControllerBase

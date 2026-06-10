@@ -7,7 +7,6 @@ using System.Text.Json;
 namespace Api.Data.Controllers
 {
     [Route("api/[controller]")]
-    [Route("api/Sequence")]
     [ApiController]
     [Produces("application/json")]
     public class SequencesController : ControllerBase

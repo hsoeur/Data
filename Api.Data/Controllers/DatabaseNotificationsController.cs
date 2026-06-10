@@ -5,8 +5,7 @@ using Serilog;
 
 namespace Api.Data.Controllers
 {
-    [Route("api/[controller]/[action]")]
-    [Route("api/DatabaseNotification/[action]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class DatabaseNotificationsController : ControllerBase
     {
@@ -19,8 +18,8 @@ namespace Api.Data.Controllers
             _repository = repository;
         }
 
-        // 1. GET: api/DatabaseNotification/GetAll
-        [HttpGet]
+        // 1. GET: api/DatabaseNotifications/GetAll
+        [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()
         {
             try
@@ -38,8 +37,8 @@ namespace Api.Data.Controllers
             }
         }
 
-        // 2. POST: api/DatabaseNotification/Create
-        [HttpPost]
+        // 2. POST: api/DatabaseNotifications/Create
+        [HttpPost("Create")]
         public async Task<IActionResult> Create([FromBody] DatabaseNotification notif)
         {
             if (notif == null)
@@ -60,7 +59,7 @@ namespace Api.Data.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpGet("Search")]
         public async Task<IActionResult> Search([FromQuery] string keyword)
         {
             if (string.IsNullOrWhiteSpace(keyword))
@@ -81,7 +80,7 @@ namespace Api.Data.Controllers
             }
         }
 
-        [HttpPost]
+        [HttpPost("Process")]
         public async Task<IActionResult> Process([FromQuery] string uid, [FromQuery] string processedBy)
         {
             if (string.IsNullOrWhiteSpace(uid) || string.IsNullOrWhiteSpace(processedBy))

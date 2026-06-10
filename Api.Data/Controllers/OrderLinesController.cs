@@ -9,7 +9,6 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Api.Data.Controllers
 {
     [Route("api/[controller]")]
-    [Route("api/OrderLine")]
     [ApiController]
     [Produces("application/json")]
     public class OrderLinesController : ControllerBase

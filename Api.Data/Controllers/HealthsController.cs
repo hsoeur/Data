@@ -3,8 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Data.Controllers
 {
-    [Route("api/[controller]/[action]")]
-    [Route("api/Health/[action]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class HealthsController : ControllerBase
     {
@@ -18,7 +17,7 @@ namespace Api.Data.Controllers
         /// <summary>
         /// Vérifie que l'API est joignable (sans vérifier la base de données).
         /// </summary>
-        [HttpGet]
+        [HttpGet("Live")]
         public IActionResult Live()
         {
             return Ok(new { api = true });
@@ -27,7 +26,7 @@ namespace Api.Data.Controllers
         /// <summary>
         /// Vérifie que la base de données est accessible.
         /// </summary>
-        [HttpGet]
+        [HttpGet("Database")]
         public async Task<IActionResult> Database(CancellationToken cancellationToken)
         {
             try
@@ -49,7 +48,7 @@ namespace Api.Data.Controllers
         /// <summary>
         /// Affiche la configuration de connexion MySQL (sans mot de passe).
         /// </summary>
-        [HttpGet]
+        [HttpGet("Config")]
         public IActionResult Config()
         {
             var server = Environment.GetEnvironmentVariable("MYSQL_HOST") ?? "localhost (default)";
@@ -73,7 +72,7 @@ namespace Api.Data.Controllers
         /// <summary>
         /// Endpoint conservé pour compatibilité.
         /// </summary>
-        [HttpGet]
+        [HttpGet("Get")]
         public IActionResult Get()
         {
             return Ok(new { api = true });

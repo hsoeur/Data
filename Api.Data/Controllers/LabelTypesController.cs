@@ -7,7 +7,6 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Api.Data.Controllers
 {
     [Route("api/[controller]")]
-    [Route("api/LabelType")]
     [ApiController]
     [Produces("application/json")]
     public class LabelTypesController : ControllerBase

@@ -12,7 +12,6 @@ using Api.Data.Dtos;
 namespace Api.Data.Controllers
 {
     [Route("api/[controller]")]
-    [Route("api/ManufacturingOrderNotification")]
     [ApiController]
     [Produces("application/json")]
     public class ManufacturingOrderNotificationsController : ControllerBase

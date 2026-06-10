@@ -361,3 +361,11 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/api-data-image.tar
+/api-data.tar
+/Api.Data.tar
+/Api.Data_2.1.0_TestRomuald
+/Api.Data_2.1.0_TestRomuald.tar
+/ProductTraceabilities.sql
+/Tolerances.csv
+/Tolerances_import.sql
