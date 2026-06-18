@@ -26,13 +26,24 @@ namespace GenDb.Generators
 
         public void Update()
         {
-            try
+            const int maxAttempts = 3;
+
+            for (var attempt = 1; attempt <= maxAttempts; attempt++)
             {
-                GenerateTable();
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "ArticleGenerator::Update() => Transaction interrompue.");
+                try
+                {
+                    GenerateTable();
+                    return;
+                }
+                catch (Exception ex) when (attempt < maxAttempts)
+                {
+                    _logger.Warning(ex, "ArticleGenerator::Update() => Transaction interrompue. Nouvelle tentative {Attempt}/{MaxAttempts} dans 5 secondes.", attempt, maxAttempts);
+                    Thread.Sleep(TimeSpan.FromSeconds(5));
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "ArticleGenerator::Update() => Transaction interrompue après {MaxAttempts} tentatives.", maxAttempts);
+                }
             }
         }
 
@@ -65,7 +76,11 @@ namespace GenDb.Generators
                 var uid = row[0];
                 if (string.IsNullOrWhiteSpace(uid))
                 { skipped++; _logger.Warning("Skip {Entity} Reason={Reason} RawLine={RawLine}", "Article", "ArticleUid manquant", string.Join("|", row)); continue; }
-                int gpaoQuantity =0; if (row.Length >7) int.TryParse(row[7], out gpaoQuantity);
+                int gpaoQuantity = 0;
+                if (row.Length > 7 && !CsvParser.TryParseInt(row[7], out gpaoQuantity))
+                {
+                    _logger.Warning("ParseFail {Entity} {Uid} Field={Field} Raw={Raw}", "Article", uid, "GpaoQuantity", row[7]);
+                }
 
                 if (existing.TryGetValue(uid, out var a))
                 {
