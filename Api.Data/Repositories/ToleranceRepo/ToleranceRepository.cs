@@ -1,6 +1,7 @@
-using DataLib;
+ï»¿using DataLib;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Api.Data.Dtos;
 
 namespace Api.Data.Repositories.ToleranceRepo
 {
@@ -29,6 +30,102 @@ namespace Api.Data.Repositories.ToleranceRepo
                 throw; // Rethrow the exception to be handled upstream
             }
         }
+
+        public async Task<CopyToleranceBatchResponse> CopyBatchAsync(
+            CopyToleranceBatchRequest request,
+            CancellationToken cancellationToken)
+        {
+            var requestedUids = request.ToleranceUids
+                .Where(uid => !string.IsNullOrWhiteSpace(uid))
+                .Distinct(StringComparer.Ordinal)
+                .ToArray();
+
+            if (requestedUids.Length != request.ToleranceUids.Count)
+                throw new InvalidToleranceSelectionException("La sÃ©lection contient un identifiant vide ou dupliquÃ©.");
+
+            var strategy = _context.Database.CreateExecutionStrategy();
+
+            return await strategy.ExecuteAsync(async () =>
+            {
+                await using var transaction =
+                    await _context.Database.BeginTransactionAsync(cancellationToken);
+
+                var sourceProductExists = await _context.Articles
+                    .AsNoTracking()
+                    .AnyAsync(article => article.ArticleUid == request.SourceProductUid, cancellationToken);
+
+                if (!sourceProductExists)
+                    throw new SourceProductNotFoundException();
+
+                var targetHasTolerances = await _context.Tolerances
+                    .AsNoTracking()
+                    .AnyAsync(tolerance => tolerance.ProductUid == request.TargetProductUid, cancellationToken);
+
+                if (targetHasTolerances)
+                    throw new TargetProductAlreadyExistsException();
+
+                var sourceTolerances = await _context.Tolerances
+                    .AsNoTracking()
+                    .Where(tolerance => requestedUids.Contains(tolerance.ToleranceUid))
+                    .ToListAsync(cancellationToken);
+
+                var invalidUids = requestedUids
+                    .Except(
+                        sourceTolerances
+                            .Where(tolerance => tolerance.ProductUid == request.SourceProductUid)
+                            .Select(tolerance => tolerance.ToleranceUid),
+                        StringComparer.Ordinal)
+                    .ToArray();
+
+                if (invalidUids.Length > 0)
+                {
+                    throw new InvalidToleranceSelectionException(
+                        $"TolÃ©rances inconnues ou n'appartenant pas au produit source : {string.Join(", ", invalidUids)}.");
+                }
+
+                var copies = sourceTolerances.Select(source => new Tolerance
+                {
+                    ToleranceUid = Guid.NewGuid().ToString(),
+                    ProductUid = request.TargetProductUid,
+                    OperationNumber = source.OperationNumber,
+                    Label = source.Label,
+                    MachineUid = source.MachineUid,
+                    UnitUid = source.UnitUid,
+                    Val1 = source.Val1,
+                    Val2 = source.Val2,
+                    Mode = source.Mode,
+                    UserUid = request.UserUid,
+                    StartDate = request.StartDate,
+                    EndDate = request.EndDate
+                }).ToList();
+
+                _context.Tolerances.AddRange(copies);
+                await _context.SaveChangesAsync(cancellationToken);
+                await transaction.CommitAsync(cancellationToken);
+
+                return new CopyToleranceBatchResponse(
+                    request.SourceProductUid,
+                    request.TargetProductUid,
+                    copies.Count,
+                    copies.Select(ToDto).ToArray());
+            });
+        }
+
+        private static ToleranceDto ToDto(Tolerance tolerance) => new()
+        {
+            ToleranceUid = tolerance.ToleranceUid,
+            ProductUid = tolerance.ProductUid,
+            OperationNumber = tolerance.OperationNumber,
+            Label = tolerance.Label,
+            MachineUid = tolerance.MachineUid,
+            UnitUid = tolerance.UnitUid,
+            Val1 = tolerance.Val1,
+            Val2 = tolerance.Val2,
+            Mode = tolerance.Mode,
+            UserUid = tolerance.UserUid,
+            StartDate = tolerance.StartDate,
+            EndDate = tolerance.EndDate
+        };
 
         public async Task<List<Tolerance>> GetCollectionTolerances()
         {
@@ -68,7 +165,7 @@ namespace Api.Data.Repositories.ToleranceRepo
                                 t.MachineUid == machine)
                     .ToListAsync();
 
-                // Enregistrements MachineUid commençant par "MO03"
+                // Enregistrements MachineUid commenÃ§ant par "MO03"
                 var mo03Matches = await _context.Tolerances
                     .Where(t => t.ProductUid == productUid &&
                                 t.OperationNumber == operationNumber &&
@@ -80,7 +177,7 @@ namespace Api.Data.Repositories.ToleranceRepo
                     .Union(mo03Matches)
                     .ToList();
 
-                // Filtrer EndDate à la valeur max
+                // Filtrer EndDate Ã  la valeur max
                 var filteredResults = mergedResults
                     .Where(t => t.EndDate == new DateTimeOffset(9999, 12, 31, 23, 59, 59, TimeSpan.Zero))
                     .ToList();
@@ -93,7 +190,7 @@ namespace Api.Data.Repositories.ToleranceRepo
                     )
                     .ToList();
 
-                // Log du succès
+                // Log du succÃ¨s
                 Log.Information("Fetched {Count} tolerances (Exact Matches: {ExactCount}, MO03 Matches: {MO03Count}).",
                                 distinctByLabel.Count, exactMatches.Count, mo03Matches.Count);
 
@@ -123,12 +220,12 @@ namespace Api.Data.Repositories.ToleranceRepo
                     return null;
                 }
 
-                // Historisation: fermer l'ancienne tolérance en mettant EndDate à aujourd'hui
+                // Historisation: fermer l'ancienne tolÃ©rance en mettant EndDate Ã  aujourd'hui
                 existingTolerance.EndDate = DateTimeOffset.UtcNow;
 
                 Log.Information("Closing existing tolerance {ToleranceUid} with EndDate: {EndDate}", toleranceUid, existingTolerance.EndDate);
 
-                // Créer une nouvelle tolérance avec les nouvelles valeurs
+                // CrÃ©er une nouvelle tolÃ©rance avec les nouvelles valeurs
                 var newTolerance = new Tolerance
                 {
                     ToleranceUid = Guid.NewGuid().ToString(),
@@ -186,3 +283,4 @@ namespace Api.Data.Repositories.ToleranceRepo
         }
     }
 }
+

@@ -1,4 +1,4 @@
-using Api.Data.Repositories.ToleranceRepo;
+Ôªøusing Api.Data.Repositories.ToleranceRepo;
 using Api.Data.Dtos;
 using DataLib;
 using Microsoft.AspNetCore.Mvc;
@@ -20,8 +20,68 @@ namespace Api.Data.Controllers
         }
 
         [SwaggerOperation(
-            Summary = "RÈcupËre toutes les tolÈrances",
-            Description = "Ce endpoint retourne toutes les tolÈrances disponibles.",
+            Summary = "Copie un lot de tol√©rances vers un autre produit",
+            Description = "Cr√©e atomiquement de nouvelles tol√©rances √† partir d'une s√©lection appartenant au produit source.",
+            OperationId = "CopyToleranceBatch"
+        )]
+        [HttpPost("batch-copy")]
+        [ProducesResponseType(typeof(CopyToleranceBatchResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+        public async Task<ActionResult<CopyToleranceBatchResponse>> CopyBatch(
+            [FromBody] CopyToleranceBatchRequest request,
+            CancellationToken cancellationToken)
+        {
+            if (string.IsNullOrWhiteSpace(request.SourceProductUid))
+                ModelState.AddModelError(nameof(request.SourceProductUid), "Le produit source est obligatoire.");
+
+            if (string.IsNullOrWhiteSpace(request.TargetProductUid))
+                ModelState.AddModelError(nameof(request.TargetProductUid), "Le produit cible est obligatoire.");
+
+            if (request.ToleranceUids is null || request.ToleranceUids.Count == 0)
+                ModelState.AddModelError(nameof(request.ToleranceUids), "Au moins une tol√©rance doit √™tre s√©lectionn√©e.");
+
+            if (string.IsNullOrWhiteSpace(request.UserUid))
+                ModelState.AddModelError(nameof(request.UserUid), "L'utilisateur est obligatoire.");
+
+            if (request.EndDate <= request.StartDate)
+                ModelState.AddModelError(nameof(request.EndDate), "La date de fin doit √™tre post√©rieure √† la date de d√©but.");
+
+            if (!ModelState.IsValid)
+                return ValidationProblem(ModelState);
+
+            try
+            {
+                var result = await _toleranceRepository.CopyBatchAsync(request, cancellationToken);
+                return StatusCode(StatusCodes.Status201Created, result);
+            }
+            catch (SourceProductNotFoundException)
+            {
+                return Problem(
+                    statusCode: StatusCodes.Status404NotFound,
+                    title: "Produit source introuvable",
+                    detail: $"Le produit '{request.SourceProductUid}' n'existe pas.");
+            }
+            catch (TargetProductAlreadyExistsException)
+            {
+                return Problem(
+                    statusCode: StatusCodes.Status409Conflict,
+                    title: "Produit cible d√©j√† existant",
+                    detail: $"Le produit '{request.TargetProductUid}' poss√®de d√©j√† des tol√©rances.");
+            }
+            catch (InvalidToleranceSelectionException exception)
+            {
+                return Problem(
+                    statusCode: StatusCodes.Status400BadRequest,
+                    title: "S√©lection de tol√©rances invalide",
+                    detail: exception.Message);
+            }
+        }
+
+        [SwaggerOperation(
+            Summary = "R√©cup√®re toutes les tol√©rances",
+            Description = "Ce endpoint retourne toutes les tol√©rances disponibles.",
             OperationId = "GetCollectionTolerances"
         )]
         [HttpGet("all")]
@@ -50,8 +110,8 @@ namespace Api.Data.Controllers
         }
 
         [SwaggerOperation(
-            Summary = "CrÈe une nouvelle tolÈrance",
-            Description = "Ce endpoint permet de crÈer une nouvelle tolÈrance avec les informations fournies.",
+            Summary = "Cr√©e une nouvelle tol√©rance",
+            Description = "Ce endpoint permet de cr√©er une nouvelle tol√©rance avec les informations fournies.",
             OperationId = "CreateTolerance"
         )]
         [HttpPost("create")]
@@ -67,11 +127,11 @@ namespace Api.Data.Controllers
 
             if (request == null)
             {
-                return BadRequest(new ProblemDetails { Title = "ParamËtre invalide", Detail = "Le corps de la requÍte est requis." });
+                return BadRequest(new ProblemDetails { Title = "Param√®tre invalide", Detail = "Le corps de la requ√™te est requis." });
             }
             if (string.IsNullOrWhiteSpace(request.ProductUid))
             {
-                return BadRequest(new ProblemDetails { Title = "ParamËtre invalide", Detail = "Le paramËtre 'ProductUid' est requis." });
+                return BadRequest(new ProblemDetails { Title = "Param√®tre invalide", Detail = "Le param√®tre 'ProductUid' est requis." });
             }
 
             Log.Information("CreateTolerance called with request: {@Request}", request);
@@ -110,8 +170,8 @@ namespace Api.Data.Controllers
         }
 
         [SwaggerOperation(
-            Summary = "RÈcupËre les tolÈrances les plus rÈcentes pour un produit, une opÈration et une machine",
-            Description = "Ce endpoint retourne les tolÈrances les plus rÈcentes en fonction des critËres fournis (ProductUid, OperationNumber, Machine).",
+            Summary = "R√©cup√®re les tol√©rances les plus r√©centes pour un produit, une op√©ration et une machine",
+            Description = "Ce endpoint retourne les tol√©rances les plus r√©centes en fonction des crit√®res fournis (ProductUid, OperationNumber, Machine).",
             OperationId = "GetCollectionTolerancesByProductUidByOperationUidByMachineUidLatestOne"
         )]
         [HttpGet("latest-by-product-operation-and-machine")]
@@ -123,7 +183,7 @@ namespace Api.Data.Controllers
         {
             if (string.IsNullOrWhiteSpace(productUid) || string.IsNullOrWhiteSpace(machine))
             {
-                return BadRequest(new ProblemDetails { Title = "ParamËtre invalide", Detail = "Les paramËtres 'productUid' et 'machine' sont requis." });
+                return BadRequest(new ProblemDetails { Title = "Param√®tre invalide", Detail = "Les param√®tres 'productUid' et 'machine' sont requis." });
             }
 
             try
@@ -146,8 +206,8 @@ namespace Api.Data.Controllers
         }
 
         [SwaggerOperation(
-            Summary = "Met ‡ jour une tolÈrance existante",
-            Description = "Ce endpoint permet de mettre ‡ jour une tolÈrance existante identifiÈe par son ToleranceUid.",
+            Summary = "Met √† jour une tol√©rance existante",
+            Description = "Ce endpoint permet de mettre √† jour une tol√©rance existante identifi√©e par son ToleranceUid.",
             OperationId = "UpdateTolerance"
         )]
         [HttpPut("update/{toleranceUid}")]
@@ -164,17 +224,17 @@ namespace Api.Data.Controllers
 
             if (string.IsNullOrWhiteSpace(toleranceUid))
             {
-                return BadRequest(new ProblemDetails { Title = "ParamËtre invalide", Detail = "Le paramËtre 'toleranceUid' est requis." });
+                return BadRequest(new ProblemDetails { Title = "Param√®tre invalide", Detail = "Le param√®tre 'toleranceUid' est requis." });
             }
 
             if (request == null)
             {
-                return BadRequest(new ProblemDetails { Title = "ParamËtre invalide", Detail = "Le corps de la requÍte est requis." });
+                return BadRequest(new ProblemDetails { Title = "Param√®tre invalide", Detail = "Le corps de la requ√™te est requis." });
             }
 
             if (string.IsNullOrWhiteSpace(request.ProductUid))
             {
-                return BadRequest(new ProblemDetails { Title = "ParamËtre invalide", Detail = "Le paramËtre 'ProductUid' est requis." });
+                return BadRequest(new ProblemDetails { Title = "Param√®tre invalide", Detail = "Le param√®tre 'ProductUid' est requis." });
             }
 
             Log.Information("UpdateTolerance called with toleranceUid: {ToleranceUid}, request: {@Request}", toleranceUid, request);
@@ -202,7 +262,7 @@ namespace Api.Data.Controllers
                 if (updatedTolerance == null)
                 {
                     Log.Warning("UpdateTolerance: Tolerance with uid {ToleranceUid} not found", toleranceUid);
-                    return NotFound(new ProblemDetails { Title = "TolÈrance introuvable", Detail = $"Aucune tolÈrance avec l'uid {toleranceUid} n'a ÈtÈ trouvÈe." });
+                    return NotFound(new ProblemDetails { Title = "Tol√©rance introuvable", Detail = $"Aucune tol√©rance avec l'uid {toleranceUid} n'a √©t√© trouv√©e." });
                 }
 
                 Log.Information("UpdateTolerance successfully updated tolerance uid: {ToleranceUid}", toleranceUid);
@@ -221,8 +281,8 @@ namespace Api.Data.Controllers
         }
          
         [SwaggerOperation(
-            Summary = "RÈcupËre toutes les tolÈrances actives",
-            Description = "Ce endpoint retourne toutes les tolÈrances dont la date du jour est comprise entre StartDate et EndDate.",
+            Summary = "R√©cup√®re toutes les tol√©rances actives",
+            Description = "Ce endpoint retourne toutes les tol√©rances dont la date du jour est comprise entre StartDate et EndDate.",
             OperationId = "GetActiveTolerances"
         )]
         [HttpGet("active")]
@@ -251,3 +311,4 @@ namespace Api.Data.Controllers
         }
     }
 }
+
