@@ -14,5 +14,6 @@ namespace Api.Data.Repositories.ManufacturingOrderRepo
         Task<ICollection<ManufacturingOrder>> GetCollectionManufacturingOrderByManufacturingOrderAmphitechOrder(string amphitechOrder);
         Task<List<ManufacturingOrder>> GetCollectionManufacturingOrdersByHorizonOrder(string horizonOrder);
         Task<bool> UpdateManufacturingOrderQuantityAndFirstSerial(string manufacturingOrderUid, string quantity, string firstSerialNumber, string operatorUid);
+        Task<ManufacturingOrder?> GetManufacturingOrderForValidation(int manufacturingOrderUid);
     }
 }

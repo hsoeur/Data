@@ -38,6 +38,13 @@ namespace Api.Data.Repositories.ManufacturingOrderRepo
             }
         }
 
+        public Task<ManufacturingOrder?> GetManufacturingOrderForValidation(int manufacturingOrderUid)
+        {
+            return _context.ManufacturingOrders
+                .AsNoTracking()
+                .SingleOrDefaultAsync(order => order.ManufacturingOrderUid == manufacturingOrderUid);
+        }
+
         public async Task<ManufacturingOrder?> GetManufacturingOrderByManufacturingOrderUid(string manufacturingOrderUid)
         {
             Log.Information("GetManufacturingOrderByManufacturingOrderUid called with uidOF: {UidOF}", manufacturingOrderUid);
