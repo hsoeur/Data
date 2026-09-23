@@ -186,6 +186,8 @@ namespace Api.Data.Controllers
                 return BadRequest(new ProblemDetails { Title = "Paramètre invalide", Detail = "Les paramètres 'productUid' et 'machine' sont requis." });
             }
 
+
+
             try
             {
                 Log.Information("GetCollectionTolerancesByProductUidByOperationUidByMachineUidLatestOne called with productUid: {ProductUid}, operationNumber: {OperationNumber}, machine: {Machine}", productUid, operationNumber, machine);

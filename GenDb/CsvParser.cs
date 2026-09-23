@@ -3,8 +3,10 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Serilog;
 
 namespace GenDb
 {
@@ -14,7 +16,15 @@ namespace GenDb
         {
             List<string[]> stringObjects = new List<string[]>();
 
-            using (TextFieldParser parser = new TextFieldParser(filePath))
+            var fullPath = Path.GetFullPath(filePath);
+            var fileInfo = new FileInfo(fullPath);
+            Log.Information(
+                "Lecture export CSV Path={CsvPath} LastWriteTime={LastWriteTime} SizeBytes={SizeBytes}",
+                fullPath,
+                fileInfo.Exists ? fileInfo.LastWriteTime : null,
+                fileInfo.Exists ? fileInfo.Length : null);
+
+            using (TextFieldParser parser = new TextFieldParser(fullPath))
             {
                 parser.TextFieldType = FieldType.Delimited;
                 parser.SetDelimiters(";");

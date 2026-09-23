@@ -9,6 +9,7 @@ namespace Api.Data.Repositories.LabelRepo
         public Task<ICollection<Label>> GetCollectionLabelsMostRecentByManufacturingOrderUid(int manufacturingOrderUid);
         public Task<Label> GetLabelByAuthentiUid(string authentiUid);
         public Task CreateLabel(Label label);
+        Task CreateLabels(IReadOnlyCollection<Label> labels);
         Task<bool> LabelExists(string authentiUid);
         Task<bool> LabelPrinted(int manufacturingOrderUid, string usageUid);
         Task<ICollection<Label>> GetCollectionLabelsByKeywordSearch(string keyword, int manufacturingOrderUid, string usageUid);

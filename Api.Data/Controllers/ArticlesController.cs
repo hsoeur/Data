@@ -139,6 +139,7 @@ namespace Api.Data.Controllers
                 Log.Information("GetArticleStoreByArticleUid called with articleUid: {ArticleUid}", articleUid);
 
                 var store = await _articleRepository.GetArticleStoreByArticleUid(articleUid);
+
                 if (string.IsNullOrWhiteSpace(store))
                 {
                     Log.Information("Store not found for articleUid: {ArticleUid}", articleUid);

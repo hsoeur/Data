@@ -56,7 +56,7 @@ namespace Api.Data.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new ProblemDetails
                 {
                     Title = "Erreur lors de la génération de l'adresse MAC",
-                    Detail = $"Erreur lors de la récupération de la prochaine adresse MAC: {ex.Message}"
+                    Detail = $"Erreur lors de la récupération de la prochaine adresse MAC: {ex.Message}",
                 });
             }
         }

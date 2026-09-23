@@ -54,8 +54,11 @@ namespace GenDb.Generators
         private void ImportData(AppDbContext context, IDbContextTransaction transaction)
         {
             var rows = CsvParser.Parse(_csvPath);
-            var existing = context.FirmwareVersions.ToList().GroupBy(v => (v.ArticleUid, v.Version)).ToDictionary(g => g.Key, g => g.First());
-            int inserted =0, skipped =0;
+            var existing = context.FirmwareVersions
+                .ToList()
+                .GroupBy(v => v.ArticleUid)
+                .ToDictionary(g => g.Key, g => g.ToList());
+            int inserted =0, updated =0, deleted =0, skipped =0;
 
             foreach (var row in rows)
             {
@@ -66,28 +69,49 @@ namespace GenDb.Generators
                 { skipped++; _logger.Warning("Skip {Entity} Reason={Reason} RawLine={RawLine}", "FirmwareVersion", "ArticleUid manquant", string.Join("|", row)); continue; }
                 // Normalize empty version to placeholder "Vx.xx"
                 version = string.IsNullOrWhiteSpace(version) ? "Vxx.xx" : version;
-                var key = (articleUid, version);
-
-                if (!existing.ContainsKey(key))
+                if (!existing.TryGetValue(articleUid, out var firmwareVersions))
                 {
-                    context.FirmwareVersions.Add(new FirmwareVersion()
+                    var firmwareVersion = new FirmwareVersion()
                     {
                         FirmwareVersionUid = Guid.NewGuid().ToString(),
                         ArticleUid = articleUid,
                         Version = version
-                    });
+                    };
+
+                    context.FirmwareVersions.Add(firmwareVersion);
+                    existing[articleUid] = new List<FirmwareVersion> { firmwareVersion };
                     inserted++;
                     _logger.Information("Insert {Entity} Key=({ArticleUid},{Version})", "FirmwareVersion", articleUid, version);
                 }
                 else
                 {
-                    _logger.Information("NoChange {Entity} Key=({ArticleUid},{Version})", "FirmwareVersion", articleUid, version);
+                    var firmwareVersion = firmwareVersions.First();
+                    var duplicateFirmwareVersions = firmwareVersions.Skip(1).ToList();
+
+                    if (firmwareVersion.Version != version)
+                    {
+                        firmwareVersion.Version = version;
+                        updated++;
+                        _logger.Information("Update {Entity} Key=({ArticleUid}) Version={Version}", "FirmwareVersion", articleUid, version);
+                    }
+                    else
+                    {
+                        _logger.Information("NoChange {Entity} Key=({ArticleUid},{Version})", "FirmwareVersion", articleUid, version);
+                    }
+
+                    if (duplicateFirmwareVersions.Count >0)
+                    {
+                        context.FirmwareVersions.RemoveRange(duplicateFirmwareVersions);
+                        deleted += duplicateFirmwareVersions.Count;
+                        existing[articleUid] = new List<FirmwareVersion> { firmwareVersion };
+                        _logger.Warning("DeleteDuplicate {Entity} Key=({ArticleUid}) Count={Count}", "FirmwareVersion", articleUid, duplicateFirmwareVersions.Count);
+                    }
                 }
             }
 
             context.SaveChanges();
             transaction.Commit();
-            _logger.Information("Summary {Entity} Inserted={Inserted} Skipped={Skipped}", "FirmwareVersion", inserted, skipped);
+            _logger.Information("Summary {Entity} Inserted={Inserted} Updated={Updated} Deleted={Deleted} Skipped={Skipped}", "FirmwareVersion", inserted, updated, deleted, skipped);
         }
     }
 }

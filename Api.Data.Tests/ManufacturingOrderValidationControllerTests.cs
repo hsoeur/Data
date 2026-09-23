@@ -81,8 +81,7 @@ public sealed class ManufacturingOrderValidationControllerTests
         };
 
         var results = new List<ValidationResult>();
-        var isValid = Validator.TryValidateObject(request, new ValidationContext(reques
-            t), results, true);
+        var isValid = Validator.TryValidateObject(request, new ValidationContext(request), results, true);
 
         Assert.Equal(expectedValid, isValid);
     }

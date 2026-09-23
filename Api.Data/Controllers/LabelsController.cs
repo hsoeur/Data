@@ -173,6 +173,68 @@ namespace Api.Data.Controllers
         }
 
         [SwaggerOperation(
+            Summary = "Crée plusieurs étiquettes en une seule opération",
+            Description = "Ce endpoint enregistre une collection d'étiquettes avec une seule sauvegarde en base de données.",
+            OperationId = "CreateLabels"
+        )]
+        [HttpPost("create-batch")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> CreateLabels([FromBody] IReadOnlyCollection<LabelDto>? requests)
+        {
+            if (requests == null || requests.Count == 0)
+            {
+                return BadRequest(new ProblemDetails
+                {
+                    Title = "Paramètre invalide",
+                    Detail = "Au moins une étiquette est requise."
+                });
+            }
+
+            var duplicateAuthentiUid = requests
+                .GroupBy(request => request.AuthentiUid, StringComparer.Ordinal)
+                .FirstOrDefault(group => group.Count() > 1)?.Key;
+
+            if (duplicateAuthentiUid != null)
+            {
+                return BadRequest(new ProblemDetails
+                {
+                    Title = "Identifiant d'étiquette dupliqué",
+                    Detail = $"L'identifiant AuthentiUid '{duplicateAuthentiUid}' apparaît plusieurs fois dans le lot."
+                });
+            }
+
+            var labels = requests.Select(CreateLabelEntity).ToArray();
+
+            try
+            {
+                await _etiquetteRepository.CreateLabels(labels);
+                Log.Information("CreateLabels successfully created {Count} labels", labels.Length);
+                return Ok(new { createdCount = labels.Length });
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Exception occurred while creating a batch of {Count} labels", labels.Length);
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        private static Label CreateLabelEntity(LabelDto request) => new()
+        {
+            LabelUid = Guid.NewGuid().ToString(),
+            AuthentiUid = request.AuthentiUid,
+            UserUid = request.UserUid,
+            ManufacturingOrderUid = request.ManufacturingOrderUid,
+            CreationDate = request.CreationDate,
+            CurrentSerialNumber = request.CurrentSerialNumber,
+            ProductVersion = request.ProductVersion,
+            LabelTypeUid = request.LabelTypeUid,
+            ProductUid = request.ProductUid,
+            Template = request.Template,
+        };
+
+        [SwaggerOperation(
             Summary = "Vérifie si une étiquette existe",
             Description = "Ce endpoint vérifie si une étiquette existe pour un AuthentiUid donné.",
             OperationId = "LabelExists"

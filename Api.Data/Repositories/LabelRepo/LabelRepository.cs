@@ -87,6 +87,25 @@ namespace Api.Data.Repositories.LabelRepo
             }
         }
 
+        public async Task CreateLabels(IReadOnlyCollection<Label> labels)
+        {
+            Log.Information("CreateLabels called with {Count} labels", labels.Count);
+
+            try
+            {
+                await _context.Labels.AddRangeAsync(labels);
+                _context.Database.SetCommandTimeout(600);
+                await _context.SaveChangesAsync();
+
+                Log.Information("CreateLabels successfully created {Count} labels", labels.Count);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Failed to create {Count} labels", labels.Count);
+                throw;
+            }
+        }
+
         public async Task<bool> LabelExists(string authentiUid)
         {
             Log.Information("CheckEtiquetteExists called with uidAuthenti: {UidAuthenti}", authentiUid);
