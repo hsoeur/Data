@@ -1,0 +1,141 @@
+# Deployment pipeline for the isolated V2/Green API.
+#
+# Required Azure DevOps secret pipeline variable:
+#   SSH_PASSWORD
+#
+# Required one-time files/directories on the production server:
+#   C:\Deploy\containers\api-data-v2\.env.v2
+#
+# This pipeline is intentionally manual and never targets the Blue container.
+
+trigger: none
+pr: none
+
+pool:
+  name: Default
+  demands:
+    - agent.name -equals VM-DEVOPS
+
+variables:
+  BUILD_CONFIGURATION: Release
+  IMAGE_NAME: api_data_v2
+  IMAGE_ARCHIVE: api_data_v2.tar
+  ARTIFACT_NAME: docker-image-v2
+  SERVER_USER: adminprod
+  SERVER_IP: 192.168.1.104
+  SERVER_PATH: C:\Deploy\containers\api-data-v2
+  CONTAINER_NAME: api-data-v2
+  COMPOSE_PROJECT_NAME: api-data-v2
+  COMPOSE_FILE: docker-compose.v2.yml
+  ENV_FILE: .env.v2
+
+stages:
+  - stage: Test
+    displayName: Test V2
+    jobs:
+      - job: Test
+        displayName: Run automated tests
+        steps:
+          - checkout: self
+            clean: true
+
+          - script: >
+              dotnet test DataProd.sln
+              --configuration $(BUILD_CONFIGURATION)
+              --nologo
+            displayName: Run .NET tests
+
+  - stage: Build
+    displayName: Build V2 Docker image
+    dependsOn: Test
+    jobs:
+      - job: Build
+        displayName: Build isolated V2 image
+        steps:
+          - checkout: self
+            clean: true
+
+          - script: >
+              docker build
+              -f Dockerfile.prod
+              -t $(IMAGE_NAME):latest
+              .
+            displayName: Build api_data_v2:latest
+
+          - script: >
+              docker save
+              $(IMAGE_NAME):latest
+              -o "$(Build.ArtifactStagingDirectory)\$(IMAGE_ARCHIVE)"
+            displayName: Export V2 image
+
+          - script: >
+              copy /Y
+              docker-compose.v2.yml
+              "$(Build.ArtifactStagingDirectory)\docker-compose.v2.yml"
+            displayName: Stage V2 Compose file
+
+          - task: PublishBuildArtifacts@1
+            displayName: Publish V2 deployment artifact
+            inputs:
+              pathToPublish: $(Build.ArtifactStagingDirectory)
+              artifactName: $(ARTIFACT_NAME)
+
+  - stage: Deploy
+    displayName: Deploy isolated V2 API
+    dependsOn: Build
+    jobs:
+      - deployment: DeployV2
+        displayName: Deploy only api-data-v2
+        environment: production-v2
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: DownloadBuildArtifacts@0
+                  displayName: Download V2 artifact
+                  inputs:
+                    buildType: current
+                    artifactName: $(ARTIFACT_NAME)
+                    downloadPath: $(Pipeline.Workspace)
+
+                - script: >
+                    pscp -batch
+                    -pw "$(SSH_PASSWORD)"
+                    "$(Pipeline.Workspace)\$(ARTIFACT_NAME)\$(IMAGE_ARCHIVE)"
+                    $(SERVER_USER)@$(SERVER_IP):$(SERVER_PATH)/$(IMAGE_ARCHIVE)
+                  displayName: Transfer V2 Docker image
+
+                - script: >
+                    pscp -batch
+                    -pw "$(SSH_PASSWORD)"
+                    "$(Pipeline.Workspace)\$(ARTIFACT_NAME)\docker-compose.v2.yml"
+                    $(SERVER_USER)@$(SERVER_IP):$(SERVER_PATH)/$(COMPOSE_FILE)
+                  displayName: Transfer V2 Compose file
+
+                - script: >
+                    plink -batch
+                    -pw "$(SSH_PASSWORD)"
+                    $(SERVER_USER)@$(SERVER_IP)
+                    "docker load -i $(SERVER_PATH)\$(IMAGE_ARCHIVE)"
+                  displayName: Load V2 Docker image
+
+                - script: >
+                    plink -batch
+                    -pw "$(SSH_PASSWORD)"
+                    $(SERVER_USER)@$(SERVER_IP)
+                    "docker compose -p $(COMPOSE_PROJECT_NAME) --env-file $(SERVER_PATH)\$(ENV_FILE) -f $(SERVER_PATH)\$(COMPOSE_FILE) config --quiet"
+                  displayName: Validate server-side V2 configuration
+
+                - script: >
+                    plink -batch
+                    -pw "$(SSH_PASSWORD)"
+                    $(SERVER_USER)@$(SERVER_IP)
+                    "docker compose -p $(COMPOSE_PROJECT_NAME) --env-file $(SERVER_PATH)\$(ENV_FILE) -f $(SERVER_PATH)\$(COMPOSE_FILE) up -d --force-recreate --wait --wait-timeout 120"
+                  displayName: Start and verify only api-data-v2
+
+                - script: >
+                    plink -batch
+                    -pw "$(SSH_PASSWORD)"
+                    $(SERVER_USER)@$(SERVER_IP)
+                    "docker ps --filter name=$(CONTAINER_NAME) && docker logs --tail 100 $(CONTAINER_NAME)"
+                  displayName: Show V2 status and startup logs

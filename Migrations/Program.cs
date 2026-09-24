@@ -11,6 +11,7 @@ using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
 // Usage examples:
 // dotnet run -- --update
 // dotnet run -- --script ./Migrations/sql/deploy.sql
+// dotnet run -- --create-script ./Migrations/sql/green_schema_baseline.sql
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -31,24 +32,66 @@ var services = builder.Services;
 services.AddDbContext<DataLib.AppDbContext>(options =>
  options.UseMySql(
  connectionString,
- ServerVersion.AutoDetect(connectionString),
+ new MySqlServerVersion(new Version(8, 0, 36)),
  mySqlOptions =>
  {
  mySqlOptions.MigrationsAssembly("Migrations");
- // Remove schema for MySQL; optionally ignore schema behavior
- // mySqlOptions.MigrationsHistoryTable("__efmigrationshistory");
+ mySqlOptions.MigrationsHistoryTable("__efmigrationshistory", "dbo");
  mySqlOptions.SchemaBehavior(MySqlSchemaBehavior.Ignore);
  }));
 
 var host = builder.Build();
 
 var outputArgIndex = Array.FindIndex(args, a => a.Equals("--script", StringComparison.OrdinalIgnoreCase));
+var createScriptArgIndex = Array.FindIndex(args, a => a.Equals("--create-script", StringComparison.OrdinalIgnoreCase));
 var updateArg = Array.Exists(args, a => a.Equals("--update", StringComparison.OrdinalIgnoreCase));
 
 using var scope = host.Services.CreateScope();
 var context = scope.ServiceProvider.GetRequiredService<DataLib.AppDbContext>();
 
-if (outputArgIndex >=0)
+if (createScriptArgIndex >= 0)
+{
+ var outputPath = args.Length > createScriptArgIndex + 1
+ ? args[createScriptArgIndex + 1]
+ : "Migrations/sql/green_schema_baseline.sql";
+
+ var outputDirectory = Path.GetDirectoryName(outputPath);
+ if (!string.IsNullOrWhiteSpace(outputDirectory))
+ {
+  Directory.CreateDirectory(outputDirectory);
+ }
+
+ // Generate the final EF model directly. Unlike the historical migration script,
+ // this does not create and then drop obsolete tables or columns.
+ var script = "-- API Data - Green schema baseline\n"
+  + "-- Generated from the current EF Core model for MySQL 8.0.36.\n"
+  + "-- Apply only to a new, empty Green database selected by the connection.\n"
+  + "-- This script creates no business data. It must never be run on Blue.\n\n"
+  + context.Database.GenerateCreateScript();
+
+ // This index was introduced by a raw-SQL migration and is therefore not part of
+ // the EF model returned by GenerateCreateScript(). Keep it in the Green baseline.
+ script += Environment.NewLine
+  + "CREATE INDEX `IX_ProductTraceabilities_ProductUid_OperationNumber` "
+  + "ON `ProductTraceabilities` (`ProductUid`(255), `OperationNumber`);"
+  + Environment.NewLine;
+
+ // A database created from the final model must also record every migration that
+ // is already represented by the baseline. Otherwise EF would replay destructive
+ // historical migrations discovered by EF on the next Database.Migrate() call.
+ var historyRepository = context.GetService<IHistoryRepository>();
+ script += Environment.NewLine + historyRepository.GetCreateScript() + Environment.NewLine;
+
+ foreach (var migrationId in context.Database.GetMigrations())
+ {
+  script += historyRepository.GetInsertScript(new HistoryRow(migrationId, ProductInfo.GetVersion()));
+  script += Environment.NewLine;
+ }
+
+ File.WriteAllText(outputPath, script);
+ Console.WriteLine($"Green baseline creation script written to {outputPath}");
+}
+else if (outputArgIndex >=0)
 {
  var outputPath = args.Length > outputArgIndex +1
  ? args[outputArgIndex +1]
@@ -70,5 +113,5 @@ else if (updateArg)
 }
 else
 {
- Console.WriteLine("Specify --update to apply migrations or --script <path> to generate SQL.");
+ Console.WriteLine("Specify --update, --script <path>, or --create-script <path>.");
 }

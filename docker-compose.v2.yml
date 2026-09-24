@@ -1,0 +1,38 @@
+services:
+  api-data-v2:
+    image: api_data_v2:latest
+    container_name: api-data-v2
+    hostname: api-data-v2
+    restart: unless-stopped
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:10000
+      MYSQL_HOST: mysql-prod
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: db_production_v2
+      MYSQL_USER: ${V2_MYSQL_USER}
+      MYSQL_PASSWORD: ${V2_MYSQL_PASSWORD}
+      TZ: Europe/Paris
+
+    volumes:
+      - ./Logs-v2:/app/Logs
+
+    # Green remains reachable only from the production host during validation.
+    ports:
+      - "127.0.0.1:10001:10000"
+
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:10000/api/Healths/Database"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+
+    networks:
+      - production-db
+
+networks:
+  production-db:
+    external: true
+    name: database_default
