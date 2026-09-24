@@ -11,6 +11,12 @@
 trigger: none
 pr: none
 
+parameters:
+  - name: runDotNetTests
+    displayName: Run .NET tests (requires NuGet access or a populated agent cache)
+    type: boolean
+    default: false
+
 pool:
   name: Default
   demands:
@@ -39,6 +45,10 @@ stages:
           - checkout: self
             clean: true
 
+          - script: echo .NET tests are skipped because the self-hosted agent cannot currently restore packages from nuget.org.
+            displayName: Report skipped tests
+            condition: eq(${{ parameters.runDotNetTests }}, false)
+
           # The self-hosted agent can be isolated from nuget.org. Restore only
           # the test dependency graph and tolerate an unavailable remote source;
           # missing packages still fail the restore with NU1101.
@@ -47,6 +57,7 @@ stages:
               --ignore-failed-sources
               --disable-parallel
             displayName: Restore test dependencies
+            condition: eq(${{ parameters.runDotNetTests }}, true)
 
           - script: >
               dotnet test Api.Data.Tests\Api.Data.Tests.csproj
@@ -54,6 +65,7 @@ stages:
               --no-restore
               --nologo
             displayName: Run .NET tests
+            condition: eq(${{ parameters.runDotNetTests }}, true)
 
   - stage: Build
     displayName: Build V2 Docker image
