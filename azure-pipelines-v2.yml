@@ -39,9 +39,19 @@ stages:
           - checkout: self
             clean: true
 
+          # The self-hosted agent can be isolated from nuget.org. Restore only
+          # the test dependency graph and tolerate an unavailable remote source;
+          # missing packages still fail the restore with NU1101.
           - script: >
-              dotnet test DataProd.sln
+              dotnet restore Api.Data.Tests\Api.Data.Tests.csproj
+              --ignore-failed-sources
+              --disable-parallel
+            displayName: Restore test dependencies
+
+          - script: >
+              dotnet test Api.Data.Tests\Api.Data.Tests.csproj
               --configuration $(BUILD_CONFIGURATION)
+              --no-restore
               --nologo
             displayName: Run .NET tests
 
