@@ -18,9 +18,9 @@ services:
     volumes:
       - ./Logs-v2:/app/Logs
 
-    # Green remains reachable only from the production host during validation.
+    # Expose the Green API on the production server's network interfaces.
     ports:
-      - "127.0.0.1:10001:10000"
+      - "10001:10000"
 
     healthcheck:
       test: ["CMD", "curl", "--fail", "--silent", "http://localhost:10000/api/Healths/Database"]
