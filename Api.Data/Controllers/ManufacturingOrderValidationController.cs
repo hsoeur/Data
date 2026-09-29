@@ -53,10 +53,13 @@ namespace Api.Data.Controllers
                     });
                 }
 
-                // Aucun Trim : l'espace final du suffixe fait partie de la référence produit.
-                var productMatches = order.ProductUid.EndsWith(
-                    request.ProductSuffix,
-                    StringComparison.OrdinalIgnoreCase);
+                // Le suffixe du code-barres est sur 6 caractères et peut donc être
+                // complété par des espaces à droite (par exemple "0640A ").
+                var productSuffix = request.ProductSuffix.TrimEnd(' ');
+                var productMatches = productSuffix.Length > 0
+                    && order.ProductUid.EndsWith(
+                        productSuffix,
+                        StringComparison.OrdinalIgnoreCase);
 
                 var lastSerialAsLong = (long)order.FirstSerialNumber + order.Quantity - 1L;
                 var hasValidRange = order.Quantity > 0 && lastSerialAsLong <= int.MaxValue;

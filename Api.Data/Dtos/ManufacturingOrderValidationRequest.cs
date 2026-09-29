@@ -7,7 +7,7 @@ namespace Api.Data.Dtos
     {
         [Required]
         [StringLength(6, MinimumLength = 6, ErrorMessage = "Le suffixe produit doit contenir exactement 6 caractères.")]
-        [SwaggerSchema(Description = "Six derniers caractères de la référence produit. Un espace final est significatif.", Nullable = false)]
+        [SwaggerSchema(Description = "Suffixe de la référence produit sur 6 caractères, complété si nécessaire par des espaces à droite.", Nullable = false)]
         public string ProductSuffix { get; init; } = string.Empty;
 
         [Required]

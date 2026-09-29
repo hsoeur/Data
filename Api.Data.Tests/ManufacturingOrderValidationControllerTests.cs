@@ -28,7 +28,7 @@ public sealed class ManufacturingOrderValidationControllerTests
     }
 
     [Fact]
-    public async Task ValidateManufacturingOrder_PreservesTrailingSpaceInProductSuffix()
+    public async Task ValidateManufacturingOrder_IgnoresFixedWidthTrailingSpaceInProductSuffix()
     {
         var controller = CreateController(CreateOrder());
 
@@ -92,7 +92,7 @@ public sealed class ManufacturingOrderValidationControllerTests
     private static ManufacturingOrder CreateOrder() => new()
     {
         ManufacturingOrderUid = 26789,
-        ProductUid = "PRODUCT-0640A ",
+        ProductUid = "71PT00640A",
         Quantity = 100,
         FirstSerialNumber = 100001,
         InternalOrderNumber = "INTERNAL",
