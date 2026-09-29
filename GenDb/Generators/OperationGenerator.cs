@@ -1,5 +1,4 @@
 ﻿using DataLib;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using System;
@@ -33,23 +32,13 @@ namespace GenDb.Generators
             catch (Exception ex)
             {
                 _logger.Error(ex, "OperationGenerator::Update() => Transaction interrompue.");
+                throw;
             }
         }
 
         private void GenerateTable()
         {
-            using (var transaction = _context.Database.BeginTransaction())
-            {
-                try
-                {
-                    ImportData(_context, transaction);
-                }
-                catch (Exception ex)
-                {
-                    transaction.Rollback();
-                    _logger.Error(ex, "OperationGenerator::GenerateTable() => Transaction interrompue.");
-                }
-            }
+            ImportData(_context);
         }
 
         private static DateTimeOffset ParseDate(string? raw)
@@ -79,7 +68,7 @@ namespace GenDb.Generators
             return 0m;
         }
 
-        private void ImportData(AppDbContext context, IDbContextTransaction transaction)
+        private void ImportData(AppDbContext context)
         {
             var rows = CsvParser.Parse(_csvPath);
             var existing = context.Operations
@@ -135,7 +124,6 @@ namespace GenDb.Generators
             }
 
             context.SaveChanges();
-            transaction.Commit();
             _logger.Information("Summary {Entity} Inserted={Inserted} Updated={Updated} Skipped={Skipped}", "Operation", inserted, updated, skipped);
         }
     }
