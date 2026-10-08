@@ -14,6 +14,7 @@ using Api.Data.Repositories.MacAddressRepo;
 using Api.Data.Repositories.MachineRepo;
 using Api.Data.Repositories.ManufacturingOrderNotificationRepo;
 using Api.Data.Repositories.ManufacturingOrderRepo;
+using Api.Data.Repositories.ManufacturingOrderSynchronizationRepo;
 using Api.Data.Repositories.MeasurementTraceabilityRepo;
 using Api.Data.Repositories.OperationRepo;
 using Api.Data.Repositories.OrderLineRepo;
@@ -125,6 +126,7 @@ options.UseMySql(
 // Repositories
 builder.Services.AddScoped<IManufacturingOrderNotificationRepository, ManufacturingOrderNotificationRepository>();
 builder.Services.AddScoped<IManufacturingOrderRepository, ManufacturingOrderRepository>();
+builder.Services.AddScoped<IManufacturingOrderSynchronizationRepository, ManufacturingOrderSynchronizationRepository>();
 builder.Services.AddScoped<IArticleRepository, ArticleRepository>();
 builder.Services.AddScoped<IBillOfMaterialRepository, BillOfMaterialRepository>();
 builder.Services.AddScoped<IFirmwareVersionRepository, FirmwareVersionRepository>();
