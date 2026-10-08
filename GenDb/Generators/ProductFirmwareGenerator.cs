@@ -1,5 +1,4 @@
 ﻿using DataLib;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using System;
@@ -32,26 +31,16 @@ namespace GenDb.Generators
             catch (Exception ex)
             {
                 _logger.Error(ex, "ProductFirmwareGenerator::Update() => Impossible d'importer les données.");
+                throw;
             }
         }
 
         private void GenerateTable()
         {
-            using (var transaction = _context.Database.BeginTransaction())
-            {
-                try
-                {
-                    ImportData(_context, transaction);
-                }
-                catch (Exception ex)
-                {
-                    transaction.Rollback();
-                    _logger.Error(ex, "ProductFirmwareGenerator::Update() => Transaction interrompue.");
-                }
-            }
+            ImportData(_context);
         }
 
-        private void ImportData(AppDbContext context, IDbContextTransaction transaction)
+        private void ImportData(AppDbContext context)
         {
             var rows = CsvParser.Parse(_csvPath);
             var existing = context.FirmwareVersions
@@ -110,7 +99,6 @@ namespace GenDb.Generators
             }
 
             context.SaveChanges();
-            transaction.Commit();
             _logger.Information("Summary {Entity} Inserted={Inserted} Updated={Updated} Deleted={Deleted} Skipped={Skipped}", "FirmwareVersion", inserted, updated, deleted, skipped);
         }
     }

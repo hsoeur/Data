@@ -1,5 +1,4 @@
 ﻿using DataLib;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using System;
@@ -32,30 +31,18 @@ namespace GenDb.Generators
             catch (Exception ex)
             {
                 _logger.Error(ex, "ManufacturingOrderGenerator::Update() => Impossible d'importer les données.");
+                throw;
             }
         }
 
         private void GenerateTable()
         {
-            using (var transaction = _context.Database.BeginTransaction())
-            {
-                try
-                {
-                    ImportData(_context, transaction);
-                }
-                catch (Exception ex)
-                {
-                    transaction.Rollback();
-                    _logger.Error(ex, "ManufacturingOrderGenerator::Update() => Transaction annulée.");
-                }
-            }
+            ImportData(_context);
         }
 
-        private void ImportData(AppDbContext context, IDbContextTransaction transaction)
+        private void ImportData(AppDbContext context)
         {
-            try
-            {
-                var rows = CsvParser.Parse(_csvPath);
+            var rows = CsvParser.Parse(_csvPath);
                 var existing = context.ManufacturingOrders.ToDictionary(of => of.ManufacturingOrderUid);
                 int inserted =0, updated =0, skipped =0;
 
@@ -100,16 +87,8 @@ namespace GenDb.Generators
                     }
                 }
 
-                context.SaveChanges();
-                transaction.Commit();
-                _logger.Information("Summary {Entity} Inserted={Inserted} Updated(LogOnly)={Updated} Skipped={Skipped}", "ManufacturingOrder", inserted, updated, skipped);
-            }
-            catch (Exception ex)
-            {
-                transaction.Rollback();
-                _logger.Error(ex, "ManufacturingOrderGenerator::ImportData() => Erreur import.");
-                throw;
-            }
+            context.SaveChanges();
+            _logger.Information("Summary {Entity} Inserted={Inserted} Updated(LogOnly)={Updated} Skipped={Skipped}", "ManufacturingOrder", inserted, updated, skipped);
         }
     }
 }

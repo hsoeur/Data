@@ -1,5 +1,4 @@
 ﻿using DataLib;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using System;
@@ -26,44 +25,23 @@ namespace GenDb.Generators
 
         public void Update()
         {
-            const int maxAttempts = 3;
-
-            for (var attempt = 1; attempt <= maxAttempts; attempt++)
+            try
             {
-                try
-                {
-                    GenerateTable();
-                    return;
-                }
-                catch (Exception ex) when (attempt < maxAttempts)
-                {
-                    _logger.Warning(ex, "ArticleGenerator::Update() => Transaction interrompue. Nouvelle tentative {Attempt}/{MaxAttempts} dans 5 secondes.", attempt, maxAttempts);
-                    Thread.Sleep(TimeSpan.FromSeconds(5));
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error(ex, "ArticleGenerator::Update() => Transaction interrompue après {MaxAttempts} tentatives.", maxAttempts);
-                }
+                GenerateTable();
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "ArticleGenerator::Update() => Import interrompu.");
+                throw;
             }
         }
 
         private void GenerateTable()
         {
-            using (var transaction = _context.Database.BeginTransaction())
-            {
-                try
-                {
-                    ImportData(_context, transaction);
-                }
-                catch (Exception ex)
-                {
-                    transaction.Rollback();
-                    _logger.Error(ex, "ArticleGenerator::GenerateTable() => Transaction interrompue.");
-                }
-            }
+            ImportData(_context);
         }
 
-        private void ImportData(AppDbContext context, IDbContextTransaction transaction)
+        private void ImportData(AppDbContext context)
         {
             var rows = CsvParser.Parse(_csvPath);
             var existing = context.Articles.ToList().ToDictionary(a => a.ArticleUid, a => a);
@@ -114,7 +92,6 @@ namespace GenDb.Generators
             }
 
             context.SaveChanges();
-            transaction.Commit();
             _logger.Information("Summary {Entity} Inserted={Inserted} Updated={Updated} Skipped={Skipped}", "Article", inserted, updated, skipped);
         }
     }

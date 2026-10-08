@@ -1,5 +1,4 @@
 ﻿using DataLib;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Configuration;
 using Serilog;
 using System;
@@ -32,26 +31,16 @@ namespace GenDb.Generators
             catch (Exception ex)
             {
                 _logger.Error(ex, "OrderLineGenerator::Update() => Transaction interrompue.");
+                throw;
             }
         }
 
         private void GenerateTable()
         {
-            using (var transaction = _context.Database.BeginTransaction())
-            {
-                try
-                {
-                    ImportData(_context, transaction);
-                }
-                catch (Exception ex)
-                {
-                    transaction.Rollback();
-                    _logger.Error(ex, "OrderLineGenerator::GenerateTable() => Transaction interrompue.");
-                }
-            }
+            ImportData(_context);
         }
 
-        private void ImportData(AppDbContext context, IDbContextTransaction transaction)
+        private void ImportData(AppDbContext context)
         {
             var rows = CsvParser.Parse(_csvPath);
             var existing = context.OrderLines.ToList().ToDictionary(o => o.UidOrderLine, o => o);
@@ -99,7 +88,6 @@ namespace GenDb.Generators
             }
 
             context.SaveChanges();
-            transaction.Commit();
             _logger.Information("Summary {Entity} Inserted={Inserted} Updated={Updated} Skipped={Skipped}", "OrderLine", inserted, updated, skipped);
         }
     }
