@@ -372,3 +372,10 @@ FodyWeavers.xsd
 
 # Local V2 deployment secrets
 .env.v2
+
+# Local V2 stack secrets and production database copies
+.env.local-v2
+/local-v2/import/*
+!/local-v2/import/README.md
+/local-v2/logs/*
+!/local-v2/logs/.gitkeep

@@ -1,0 +1,108 @@
+name: api-data-local-v2
+
+services:
+  mysql-v2:
+    image: mysql:8.0.45
+    container_name: mysql-local-v2
+    hostname: mysql-local-v2
+    restart: unless-stopped
+
+    environment:
+      MYSQL_ROOT_PASSWORD: ${LOCAL_V2_MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: db_production_v2
+      MYSQL_USER: ${LOCAL_V2_MYSQL_USER}
+      MYSQL_PASSWORD: ${LOCAL_V2_MYSQL_PASSWORD}
+      TZ: Europe/Paris
+
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
+      - --sql-mode=STRICT_TRANS_TABLES,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION
+
+    volumes:
+      - mysql-local-v2-data:/var/lib/mysql
+      - ./local-v2/import:/docker-entrypoint-initdb.d:ro
+
+    ports:
+      - "127.0.0.1:${LOCAL_V2_MYSQL_PORT:-23306}:3306"
+
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+    networks:
+      - local-v2
+
+  phpmyadmin-v2:
+    image: phpmyadmin/phpmyadmin:5.2.1
+    container_name: phpmyadmin-local-v2
+    hostname: phpmyadmin-local-v2
+    restart: unless-stopped
+
+    depends_on:
+      mysql-v2:
+        condition: service_healthy
+
+    environment:
+      PMA_HOST: mysql-v2
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 0
+      UPLOAD_LIMIT: 1G
+      TZ: Europe/Paris
+
+    ports:
+      - "127.0.0.1:${LOCAL_V2_PHPMYADMIN_PORT:-9081}:80"
+
+    networks:
+      - local-v2
+
+  api-data-v2:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    image: api_data_local_v2:latest
+    container_name: api-data-local-v2
+    hostname: api-data-local-v2
+    restart: unless-stopped
+
+    depends_on:
+      mysql-v2:
+        condition: service_healthy
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:10000
+      MYSQL_HOST: mysql-v2
+      MYSQL_PORT: 3306
+      MYSQL_DATABASE: db_production_v2
+      MYSQL_USER: ${LOCAL_V2_MYSQL_USER}
+      MYSQL_PASSWORD: ${LOCAL_V2_MYSQL_PASSWORD}
+      TZ: Europe/Paris
+
+    volumes:
+      - ./local-v2/logs:/app/Logs
+
+    ports:
+      - "127.0.0.1:${LOCAL_V2_API_PORT:-11000}:10000"
+
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:10000/api/Healths/Database"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+    networks:
+      - local-v2
+
+networks:
+  local-v2:
+    name: api-data-local-v2-network
+
+volumes:
+  mysql-local-v2-data:
+    name: api-data-local-v2-mysql-data
