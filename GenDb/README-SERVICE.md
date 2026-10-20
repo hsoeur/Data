@@ -31,6 +31,24 @@ Arrêtez au préalable l'ancienne tâche planifiée pour éviter deux imports co
 
 ## Installation du service
 
+La procédure recommandée consiste à utiliser le script de déploiement après avoir publié dans `C:\BackServices\GenDb2.0_next` :
+
+```powershell
+.\GenDb\Deploy-GenDbService.ps1
+```
+
+Si plusieurs tâches planifiées contiennent `GenDb`, indiquez explicitement l'ancienne tâche :
+
+```powershell
+.\GenDb\Deploy-GenDbService.ps1 `
+    -LegacyTaskName 'Nom exact de la tâche' `
+    -LegacyTaskPath '\'
+```
+
+Le script contrôle la publication et les CSV, désactive l'ancienne tâche, sauvegarde le dossier de production, installe ou met à jour le service, configure sa récupération et restaure automatiquement l'ancienne version en cas d'échec.
+
+### Installation manuelle
+
 Dans un terminal PowerShell administrateur :
 
 ```powershell
